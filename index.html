@@ -252,6 +252,68 @@
   }
 
   .word.pending { color: var(--ink); opacity: 0.4; }
+  /* ─── TTS WORD TOOLTIP ───────────────────────────────────── */
+  .word-wrap {
+    display: inline-block;
+    position: relative;
+    margin-right: 0.3rem;
+  }
+
+  .word-wrap .word {
+    margin-right: 0;
+  }
+
+  .tts-btn {
+    display: none;
+    position: absolute;
+    top: -28px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    border: none;
+    border-radius: 3px;
+    padding: 4px 7px;
+    cursor: pointer;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    z-index: 50;
+    box-shadow: 0 2px 8px #00000033;
+    transition: background 0.15s;
+  }
+
+  .tts-btn::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: var(--ink);
+  }
+
+  .tts-btn:hover { background: var(--accent); }
+  .tts-btn:hover::after { border-top-color: var(--accent); }
+
+  .tts-btn svg { display: block; }
+
+  .tts-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.08em;
+    color: var(--paper);
+    text-transform: uppercase;
+  }
+
+  .word-wrap:hover .tts-btn,
+  .word-wrap:focus-within .tts-btn {
+    display: flex;
+  }
+
+  .tts-btn.speaking { background: var(--accent); }
+  .tts-btn.speaking::after { border-top-color: var(--accent); }
+
+
 
   @keyframes shake {
     0%, 100% { transform: translateX(0); }
@@ -642,16 +704,53 @@
   footer {
     position: relative;
     z-index: 10;
-    padding: 1.25rem 3rem;
+    padding: 0;
     border-top: 1px solid var(--border);
+  }
+
+  .footer-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 1rem 3rem;
+    border-bottom: 1px solid var(--border);
     font-family: 'DM Mono', monospace;
     font-size: 0.62rem;
     letter-spacing: 0.1em;
     color: var(--ink-soft);
   }
+
+  .footer-dev {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    padding: 0.85rem 3rem;
+    background: var(--ink);
+    color: #c8bfad99;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .footer-dev-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-style: italic;
+    color: var(--gold-pale);
+    letter-spacing: 0.02em;
+    text-transform: none;
+  }
+
+  .footer-dev-sep {
+    width: 1px;
+    height: 14px;
+    background: #ffffff22;
+  }
+
+  .footer-dev-heart { color: var(--accent); }
 
   /* ─── RESPONSIVE ─────────────────────────────────────────── */
   @media (max-width: 900px) {
@@ -893,8 +992,30 @@
 
 <!-- ─── FOOTER ───────────────────────────────────────────────── -->
 <footer>
-  <span>SpeakUp — English Speaking Practice</span>
-  <span>Powered by Web Speech API · For best results use Chrome or Edge</span>
+  <div class="footer-top">
+    <span>SpeakUp &mdash; English Speaking Practice</span>
+    <span>Powered by Web Speech API &nbsp;&middot;&nbsp; Best on Chrome &amp; Edge</span>
+  </div>
+  <div class="footer-dev">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <rect x="1" y="3" width="12" height="9" rx="1.5" stroke="#c9a96e" stroke-width="1.2"/>
+      <path d="M4 3V2.5a3 3 0 0 1 6 0V3" stroke="#c9a96e" stroke-width="1.2"/>
+      <circle cx="7" cy="7.5" r="1.2" fill="#c9a96e"/>
+    </svg>
+    <span>Crafted with</span>
+    <svg class="footer-dev-heart" width="13" height="13" viewBox="0 0 13 13" fill="none">
+      <path d="M6.5 11S1 7.5 1 4a2.5 2.5 0 0 1 5.5-.5A2.5 2.5 0 0 1 12 4c0 3.5-5.5 7-5.5 7z" fill="#c0392b"/>
+    </svg>
+    <span>by</span>
+    <span class="footer-dev-name">Marr</span>
+    <div class="footer-dev-sep"></div>
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+      <circle cx="6.5" cy="6.5" r="5.5" stroke="#c8bfad" stroke-width="1.1" opacity="0.5"/>
+      <path d="M4 5.5c0-1.38 1.12-2.5 2.5-2.5S9 4.12 9 5.5c0 2.5-2.5 4-2.5 4S4 8 4 5.5z" stroke="#c8bfad" stroke-width="1.1" opacity="0.5"/>
+      <line x1="2" y1="6.5" x2="11" y2="6.5" stroke="#c8bfad" stroke-width="1.1" opacity="0.5"/>
+    </svg>
+    <span>speakup &copy; 2025</span>
+  </div>
 </footer>
 
 <!-- ─── SCRIPT ───────────────────────────────────────────────── -->
@@ -1006,15 +1127,75 @@
   }
 
   // ── RENDER WORDS ─────────────────────────────────────────────
+  const SPEAKER_SVG = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M1 4.5h2l3-3v9L3 7.5H1v-3z" fill="#f5f0e8"/>
+    <path d="M8 3.5a3.5 3.5 0 0 1 0 5" stroke="#f5f0e8" stroke-width="1.2" stroke-linecap="round"/>
+    <path d="M9.5 2a5.5 5.5 0 0 1 0 8" stroke="#f5f0e8" stroke-width="1.2" stroke-linecap="round" opacity="0.5"/>
+  </svg>`;
+
+  const SPEAKER_PLAYING_SVG = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M1 4.5h2l3-3v9L3 7.5H1v-3z" fill="#f5f0e8"/>
+    <path d="M8 3.5a3.5 3.5 0 0 1 0 5" stroke="#f5f0e8" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="8.5" cy="6" r="1" fill="#f5f0e8"/>
+  </svg>`;
+
   function renderWords() {
     const container = document.getElementById('wordsContainer');
     container.innerHTML = words.map((w, i) => {
       let cls = 'pending';
       if (i < currentWordIdx) cls = 'correct';
       else if (i === currentWordIdx) cls = 'current';
-      return `<span class="word ${cls}" id="word-${i}">${w}</span>`;
-    }).join(' ');
+      return `<span class="word-wrap" id="wrap-${i}">` +
+        `<button class="tts-btn" id="tts-${i}" onclick="speakWord('${w.replace(/'/g,"\'")}', ${i})" title="Hear pronunciation" tabindex="-1">` +
+        SPEAKER_SVG +
+        `<span class="tts-label">Hear</span>` +
+        `</button>` +
+        `<span class="word ${cls}" id="word-${i}">${w}</span>` +
+        `</span>`;
+    }).join('');
     updateProgress();
+  }
+
+  // ── TEXT-TO-SPEECH ───────────────────────────────────────────
+  let currentTTS = null;
+
+  const synth = window.speechSynthesis || null;
+
+  function speakWord(word, idx) {
+    if (!synth) { showToast('Text-to-speech not supported in this browser.', 'warning'); return; }
+
+    const btn = document.getElementById('tts-' + idx);
+    if (!btn) return;
+
+    // Stop any ongoing speech & reset buttons
+    synth.cancel();
+    document.querySelectorAll('.tts-btn').forEach(b => b.classList.remove('speaking'));
+
+    const utter = new SpeechSynthesisUtterance(word);
+    utter.lang = 'en-US';
+    utter.rate = 0.82;
+    utter.pitch = 1;
+    utter.volume = 1;
+
+    // Pick a clear English voice if available
+    const voices = synth.getVoices();
+    const preferred = voices.find(v =>
+      (v.lang === 'en-US' || v.lang === 'en-GB') &&
+      (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Samantha') || v.name.includes('Daniel'))
+    ) || voices.find(v => v.lang === 'en-US') || voices[0];
+    if (preferred) utter.voice = preferred;
+
+    utter.onstart = () => { btn.classList.add('speaking'); };
+    utter.onend   = () => { btn.classList.remove('speaking'); };
+    utter.onerror = () => { btn.classList.remove('speaking'); };
+
+    synth.speak(utter);
+  }
+
+  // Pre-load voices (Chrome lazy-loads them)
+  if (synth) {
+    synth.getVoices();
+    synth.onvoiceschanged = () => synth.getVoices();
   }
 
   function markWord(idx, status) {
@@ -1033,46 +1214,45 @@
   }
 
   // ── SPEECH RECOGNITION ───────────────────────────────────────
-  function setupSpeechRecognition() {
+  let isRestarting = false;
+
+  function createRecognitionInstance() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      setStatus('error', 'Speech Recognition not supported. Use Chrome or Edge.');
-      document.getElementById('playBtn').disabled = true;
-      return;
-    }
+    const r = new SpeechRecognition();
+    r.lang = 'en-US';
+    r.continuous = true;
+    r.interimResults = true;
+    r.maxAlternatives = 5;
 
-    recognition = new SpeechRecognition();
-    recognition.lang = 'en-US';
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.maxAlternatives = 5;
-
-    recognition.onstart = () => {
-      isRecording = true;
+    r.onstart = () => {
+      isRestarting = false;
       setStatus('active', 'Listening... Speak the highlighted word.');
       document.getElementById('playBtn').classList.add('recording');
       document.getElementById('waveform').classList.add('active');
     };
 
-    recognition.onend = () => {
-      if (isRecording) {
-        // Auto-restart to keep listening
-        try { recognition.start(); } catch(e) {}
-      } else {
+    r.onend = () => {
+      if (isRecording && !isRestarting) {
+        // Normal auto-restart to keep listening
+        try { r.start(); } catch(e) {}
+      } else if (!isRecording) {
         document.getElementById('playBtn').classList.remove('recording');
         document.getElementById('waveform').classList.remove('active');
       }
     };
 
-    recognition.onerror = (e) => {
+    r.onerror = (e) => {
       if (e.error === 'no-speech') return;
       if (e.error === 'not-allowed') {
         setStatus('error', 'Microphone access denied. Please allow microphone access.');
         isRecording = false;
+        return;
       }
+      // audio-capture or aborted = likely device switch, will be handled by devicechange
+      if (e.error === 'audio-capture' || e.error === 'aborted') return;
     };
 
-    recognition.onresult = (e) => {
+    r.onresult = (e) => {
       if (!isRecording || currentWordIdx >= words.length) return;
 
       let finalTranscript = '';
@@ -1102,6 +1282,51 @@
         processSpokenText(finalTranscript.trim(), allAlternatives);
       }
     };
+
+    return r;
+  }
+
+  function setupSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setStatus('error', 'Speech Recognition not supported. Use Chrome or Edge.');
+      document.getElementById('playBtn').disabled = true;
+      return;
+    }
+
+    recognition = createRecognitionInstance();
+
+    // ── DEVICE CHANGE: reinitialize when mic is swapped ──────────
+    if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) {
+      navigator.mediaDevices.addEventListener('devicechange', async () => {
+        if (!isRecording) return;
+
+        isRestarting = true;
+        setStatus('active', 'Microphone changed — reconnecting...');
+        showToast('🎧 New mic detected, reconnecting...', 'warning');
+
+        // Stop old instance cleanly
+        try { recognition.abort(); } catch(e) {}
+
+        // Small delay so OS has time to switch the default device
+        await new Promise(res => setTimeout(res, 600));
+
+        // Create fresh instance with new device
+        recognition = createRecognitionInstance();
+        isRestarting = false;
+
+        try {
+          recognition.start();
+          showToast('✓ Microphone reconnected!', 'success');
+        } catch(e) {
+          setStatus('error', 'Failed to reconnect mic. Press Stop then Start again.');
+          isRecording = false;
+          document.getElementById('playBtn').disabled = false;
+          document.getElementById('stopBtn').disabled = true;
+          document.getElementById('waveform').classList.remove('active');
+        }
+      });
+    }
   }
 
   // ── CORE MATCHING LOGIC ──────────────────────────────────────
@@ -1269,7 +1494,8 @@
 
   function stopPractice() {
     isRecording = false;
-    if (recognition) { try { recognition.stop(); } catch(e) {} }
+    isRestarting = false;
+    if (recognition) { try { recognition.abort(); } catch(e) {} }
     document.getElementById('playBtn').disabled = false;
     document.getElementById('playBtn').classList.remove('recording');
     document.getElementById('stopBtn').disabled = true;
