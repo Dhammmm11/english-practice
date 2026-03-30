@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SpeakUp — English Speaking Practice</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink:       #1a1714;
+    --ink-soft:  #3d3733;
+    --paper:     #f5f0e8;
+    --paper-mid: #ede7d9;
+    --paper-dark:#d9d0c0;
+    --accent:    #c0392b;
+    --accent-dim:#8b2a1f;
+    --gold:      #a07840;
+    --gold-pale: #c9a96e;
+    --correct:   #2d6a4f;
+    --wrong:     #c0392b;
+    --pending:   #1a1714;
+    --current:   #a07840;
+    --border:    #c8bfad;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { font-size: 16px; }
+
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: 'Instrument Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  /* ─── NOISE TEXTURE OVERLAY ─────────────────────────────── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── HEADER ─────────────────────────────────────────────── */
+  header {
+    position: relative;
+    z-index: 10;
+    padding: 2rem 3rem 1.5rem;
+    border-bottom: 2px solid var(--ink);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .logo-block { display: flex; flex-direction: column; gap: 0.15rem; }
+
+  .logo-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .logo-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    color: var(--ink);
+  }
+
+  .logo-title span { color: var(--accent); }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.35rem 0.75rem;
+    border: 1.5px solid var(--border);
+    color: var(--ink-soft);
+  }
+
+  /* ─── MAIN LAYOUT ────────────────────────────────────────── */
+  main {
+    position: relative;
+    z-index: 10;
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 0;
+    max-width: 1300px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 2.5rem 3rem;
+    gap: 3rem;
+  }
+
+  /* ─── LEFT PANEL ─────────────────────────────────────────── */
+  .practice-panel { display: flex; flex-direction: column; gap: 2rem; }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ─── TEXT SELECTOR ──────────────────────────────────────── */
+  .text-selector {
+    background: var(--paper-mid);
+    border: 1.5px solid var(--border);
+    padding: 1.5rem;
+  }
+
+  .preset-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .preset-btn {
+    padding: 0.5rem 0.75rem;
+    border: 1.5px solid var(--border);
+    background: var(--paper);
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    line-height: 1.3;
+  }
+
+  .preset-btn:hover { border-color: var(--gold); color: var(--ink); }
+  .preset-btn.active { border-color: var(--accent); background: var(--ink); color: var(--paper); }
+
+  .custom-text-area {
+    width: 100%;
+    min-height: 90px;
+    padding: 0.85rem 1rem;
+    border: 1.5px solid var(--border);
+    background: var(--paper);
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--ink);
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .custom-text-area:focus { border-color: var(--gold); }
+
+  .load-btn {
+    margin-top: 0.6rem;
+    padding: 0.6rem 1.25rem;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .load-btn:hover { background: var(--accent); }
+
+  /* ─── TEXT DISPLAY ───────────────────────────────────────── */
+  .text-display-card {
+    background: var(--paper-mid);
+    border: 1.5px solid var(--border);
+    padding: 2rem 2.5rem;
+    position: relative;
+    min-height: 180px;
+  }
+
+  .text-display-card::before {
+    content: '"';
+    position: absolute;
+    top: -0.5rem;
+    left: 1.5rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 5rem;
+    color: var(--paper-dark);
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .words-container {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.75rem;
+    line-height: 1.8;
+    color: var(--ink);
+    position: relative;
+    z-index: 1;
+  }
+
+  .word {
+    display: inline-block;
+    margin-right: 0.3rem;
+    padding: 0 0.1rem;
+    transition: all 0.2s;
+    border-bottom: 3px solid transparent;
+    cursor: default;
+  }
+
+  .word.correct {
+    color: var(--correct);
+    border-bottom-color: var(--correct);
+  }
+
+  .word.wrong {
+    color: var(--wrong);
+    border-bottom-color: var(--wrong);
+    animation: shake 0.35s ease;
+  }
+
+  .word.current {
+    color: var(--current);
+    border-bottom-color: var(--current);
+    background: #a0784015;
+  }
+
+  .word.pending { color: var(--ink); opacity: 0.4; }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+
+  /* ─── PROGRESS BAR ───────────────────────────────────────── */
+  .progress-track {
+    height: 4px;
+    background: var(--paper-dark);
+    margin-top: 1rem;
+    position: relative;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--correct);
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+
+  /* ─── CONTROLS ───────────────────────────────────────────── */
+  .controls-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-play {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.9rem 2rem;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+
+  .btn-play:hover { background: var(--accent); }
+  .btn-play:active { transform: scale(0.98); }
+  .btn-play:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-play.recording { background: var(--accent); }
+
+  .btn-stop {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.9rem 1.5rem;
+    background: transparent;
+    color: var(--ink);
+    border: 1.5px solid var(--ink);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-stop:hover { background: var(--ink); color: var(--paper); }
+
+  .btn-reset {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.9rem 1.25rem;
+    background: transparent;
+    color: var(--gold);
+    border: 1.5px solid var(--gold);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-reset:hover { background: var(--gold); color: var(--paper); }
+
+  /* ─── STATUS BAR ─────────────────────────────────────────── */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.85rem 1.25rem;
+    border: 1.5px solid var(--border);
+    background: var(--paper-mid);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--paper-dark);
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+
+  .status-dot.active { background: var(--accent); animation: pulse 1s infinite; }
+  .status-dot.success { background: var(--correct); animation: none; }
+  .status-dot.error { background: var(--wrong); animation: none; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .status-text { color: var(--ink-soft); flex: 1; }
+  .status-heard {
+    color: var(--ink);
+    font-style: italic;
+    max-width: 220px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ─── FEEDBACK TOAST ─────────────────────────────────────── */
+  .feedback-toast {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    z-index: 1000;
+    padding: 1rem 1.5rem;
+    border: 2px solid;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.25s;
+    pointer-events: none;
+    max-width: 300px;
+  }
+
+  .feedback-toast.show { opacity: 1; transform: translateY(0); }
+  .feedback-toast.success { background: #d4edda; border-color: var(--correct); color: var(--correct); }
+  .feedback-toast.error { background: #fce4e4; border-color: var(--wrong); color: var(--wrong); }
+  .feedback-toast.warning { background: #fef9e7; border-color: var(--gold); color: var(--gold); }
+
+  /* ─── RIGHT SIDEBAR ──────────────────────────────────────── */
+  .sidebar { display: flex; flex-direction: column; gap: 2rem; }
+
+  .sidebar-card {
+    background: var(--paper-mid);
+    border: 1.5px solid var(--border);
+    padding: 1.5rem;
+  }
+
+  .sidebar-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ─── SCORE STATS ────────────────────────────────────────── */
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  .stat-item { display: flex; flex-direction: column; gap: 0.25rem; }
+
+  .stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .stat-value.correct { color: var(--correct); }
+  .stat-value.wrong { color: var(--wrong); }
+  .stat-value.total { color: var(--gold); }
+  .stat-value.attempts { color: var(--ink-soft); }
+
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  /* ─── TIPS ───────────────────────────────────────────────── */
+  .tip-list { display: flex; flex-direction: column; gap: 0.75rem; }
+
+  .tip-item {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    padding: 0.6rem;
+    background: var(--paper);
+    border-left: 2px solid var(--border);
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    transition: border-color 0.2s;
+  }
+
+  .tip-item.active-tip { border-left-color: var(--gold); color: var(--ink); }
+
+  .tip-icon { flex-shrink: 0; margin-top: 1px; }
+
+  /* ─── PHONETIC GUIDE ─────────────────────────────────────── */
+  .phonetic-current {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .phonetic-word {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .phonetic-symbol {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+  }
+
+  .phonetic-hint {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    padding-top: 0.3rem;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ─── LEGEND ─────────────────────────────────────────────── */
+  .legend { display: flex; flex-direction: column; gap: 0.6rem; }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .legend-swatch {
+    width: 24px;
+    height: 3px;
+    flex-shrink: 0;
+  }
+
+  .legend-swatch.correct { background: var(--correct); }
+  .legend-swatch.wrong { background: var(--wrong); }
+  .legend-swatch.current { background: var(--current); }
+  .legend-swatch.pending { background: var(--paper-dark); }
+
+  /* ─── COMPLETE OVERLAY ───────────────────────────────────── */
+  .complete-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #1a1714ee;
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .complete-overlay.show { display: flex; }
+
+  .complete-card {
+    background: var(--paper);
+    border: 2px solid var(--gold);
+    padding: 3rem 4rem;
+    text-align: center;
+    max-width: 480px;
+    width: 90%;
+    animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  @keyframes popIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .complete-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .complete-heading {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+
+  .complete-sub {
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+
+  .complete-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: var(--paper-mid);
+    border: 1px solid var(--border);
+  }
+
+  .complete-stat { text-align: center; }
+  .complete-stat-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--correct);
+  }
+  .complete-stat-lbl {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .complete-btn {
+    padding: 0.9rem 2.5rem;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .complete-btn:hover { background: var(--accent); }
+
+  /* ─── WAVEFORM ANIMATION ─────────────────────────────────── */
+  .waveform {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 20px;
+  }
+
+  .wave-bar {
+    width: 3px;
+    background: var(--accent);
+    border-radius: 1px;
+    height: 4px;
+    transition: height 0.15s;
+  }
+
+  .waveform.active .wave-bar:nth-child(1) { animation: wave 0.8s ease-in-out infinite 0.0s; }
+  .waveform.active .wave-bar:nth-child(2) { animation: wave 0.8s ease-in-out infinite 0.1s; }
+  .waveform.active .wave-bar:nth-child(3) { animation: wave 0.8s ease-in-out infinite 0.2s; }
+  .waveform.active .wave-bar:nth-child(4) { animation: wave 0.8s ease-in-out infinite 0.15s; }
+  .waveform.active .wave-bar:nth-child(5) { animation: wave 0.8s ease-in-out infinite 0.05s; }
+
+  @keyframes wave {
+    0%, 100% { height: 4px; }
+    50% { height: 16px; }
+  }
+
+  /* ─── FOOTER ─────────────────────────────────────────────── */
+  footer {
+    position: relative;
+    z-index: 10;
+    padding: 1.25rem 3rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    color: var(--ink-soft);
+  }
+
+  /* ─── RESPONSIVE ─────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; padding: 1.5rem; }
+    header { padding: 1.5rem; }
+    .words-container { font-size: 1.3rem; }
+    .preset-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── FEEDBACK TOAST ──────────────────────────────────────── -->
+<div class="feedback-toast" id="toast"></div>
+
+<!-- ─── COMPLETE OVERLAY ────────────────────────────────────── -->
+<div class="complete-overlay" id="completeOverlay">
+  <div class="complete-card">
+    <p class="complete-eyebrow">Practice Complete</p>
+    <h2 class="complete-heading">Well Done!</h2>
+    <p class="complete-sub" id="completeSub">You've successfully read all the text aloud. Your pronunciation is improving!</p>
+    <div class="complete-stats">
+      <div class="complete-stat">
+        <div class="complete-stat-val" id="finalWords">0</div>
+        <div class="complete-stat-lbl">Words Read</div>
+      </div>
+      <div class="complete-stat">
+        <div class="complete-stat-val" id="finalAttempts">0</div>
+        <div class="complete-stat-lbl">Total Attempts</div>
+      </div>
+      <div class="complete-stat">
+        <div class="complete-stat-val" id="finalAccuracy">0%</div>
+        <div class="complete-stat-lbl">Accuracy</div>
+      </div>
+    </div>
+    <button class="complete-btn" onclick="resetAll()">Practice Again</button>
+  </div>
+</div>
+
+<!-- ─── HEADER ──────────────────────────────────────────────── -->
+<header>
+  <div class="logo-block">
+    <p class="logo-eyebrow">English Speaking Practice</p>
+    <h1 class="logo-title">Speak<span>Up</span></h1>
+  </div>
+  <div class="header-right">
+    <div class="badge">Speech Recognition</div>
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="14" cy="14" r="13" stroke="#1a1714" stroke-width="1.5"/>
+      <rect x="10" y="7" width="8" height="11" rx="4" stroke="#1a1714" stroke-width="1.5"/>
+      <path d="M7 17c0 3.866 3.134 7 7 7s7-3.134 7-7" stroke="#c0392b" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="14" y1="24" x2="14" y2="27" stroke="#c0392b" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+  </div>
+</header>
+
+<!-- ─── MAIN ─────────────────────────────────────────────────── -->
+<main>
+  <!-- LEFT PANEL -->
+  <div class="practice-panel">
+
+    <!-- TEXT SELECTOR -->
+    <div>
+      <p class="section-label">Choose or Enter Text</p>
+      <div class="text-selector">
+        <div class="preset-grid">
+          <button class="preset-btn active" onclick="selectPreset(0, this)">
+            Daily Conversation
+          </button>
+          <button class="preset-btn" onclick="selectPreset(1, this)">
+            Business English
+          </button>
+          <button class="preset-btn" onclick="selectPreset(2, this)">
+            Travel Phrases
+          </button>
+          <button class="preset-btn" onclick="selectPreset(3, this)">
+            News Article
+          </button>
+          <button class="preset-btn" onclick="selectPreset(4, this)">
+            Tongue Twisters
+          </button>
+          <button class="preset-btn" onclick="selectPreset(5, this)">
+            Custom Text
+          </button>
+        </div>
+        <textarea class="custom-text-area" id="customTextArea" placeholder="Type or paste your own English text here..." style="display:none"></textarea>
+        <div id="presetPreview" style="font-size:0.82rem;color:var(--ink-soft);padding:0.5rem 0;font-style:italic;line-height:1.6;"></div>
+        <button class="load-btn" onclick="loadSelectedText()">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="display:inline;margin-right:6px;vertical-align:middle"><path d="M6 1v7M3 5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="1" y1="11" x2="11" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Load Text
+        </button>
+      </div>
+    </div>
+
+    <!-- TEXT DISPLAY -->
+    <div>
+      <p class="section-label">Read This Aloud</p>
+      <div class="text-display-card">
+        <div class="words-container" id="wordsContainer">
+          <span class="word pending">Press</span>
+          <span class="word pending">load</span>
+          <span class="word pending">text</span>
+          <span class="word pending">to</span>
+          <span class="word pending">begin</span>
+          <span class="word pending">practice.</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATUS BAR -->
+    <div class="status-bar">
+      <div class="status-dot" id="statusDot"></div>
+      <span class="status-text" id="statusText">Ready to start. Press Play to begin.</span>
+      <div class="waveform" id="waveform">
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+      </div>
+      <span class="status-heard" id="heardText"></span>
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="controls-row">
+      <button class="btn-play" id="playBtn" onclick="startPractice()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <polygon points="3,1 15,8 3,15" fill="currentColor"/>
+        </svg>
+        Start Practice
+      </button>
+      <button class="btn-stop" id="stopBtn" onclick="stopPractice()" disabled>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <rect x="1" y="1" width="12" height="12" fill="currentColor"/>
+        </svg>
+        Stop
+      </button>
+      <button class="btn-reset" onclick="resetAll()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M12 7A5 5 0 1 1 7 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <polygon points="7,0 11,3 7,6" fill="currentColor"/>
+        </svg>
+        Reset
+      </button>
+    </div>
+  </div>
+
+  <!-- RIGHT SIDEBAR -->
+  <div class="sidebar">
+
+    <!-- SCORE -->
+    <div class="sidebar-card">
+      <p class="sidebar-title">Session Score</p>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value correct" id="statCorrect">0</div>
+          <div class="stat-label">Correct Words</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value wrong" id="statWrong">0</div>
+          <div class="stat-label">Retries</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value total" id="statProgress">0/0</div>
+          <div class="stat-label">Progress</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value attempts" id="statAccuracy">—</div>
+          <div class="stat-label">Accuracy</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CURRENT WORD GUIDE -->
+    <div class="sidebar-card">
+      <p class="sidebar-title">Current Word</p>
+      <div class="phonetic-current" id="phoneticPanel">
+        <div class="phonetic-word" id="phoneticWord">—</div>
+        <div class="phonetic-symbol" id="phoneticSymbol"></div>
+        <div class="phonetic-hint" id="phoneticHint">Start speaking to see pronunciation tips here.</div>
+      </div>
+    </div>
+
+    <!-- LEGEND -->
+    <div class="sidebar-card">
+      <p class="sidebar-title">Legend</p>
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-swatch current"></div>
+          Current word to say
+        </div>
+        <div class="legend-item">
+          <div class="legend-swatch correct"></div>
+          Correctly pronounced
+        </div>
+        <div class="legend-item">
+          <div class="legend-swatch wrong"></div>
+          Mispronounced — try again
+        </div>
+        <div class="legend-item">
+          <div class="legend-swatch pending"></div>
+          Not yet reached
+        </div>
+      </div>
+    </div>
+
+    <!-- TIPS -->
+    <div class="sidebar-card">
+      <p class="sidebar-title">Speaking Tips</p>
+      <div class="tip-list">
+        <div class="tip-item active-tip">
+          <svg class="tip-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle cx="7" cy="7" r="6" stroke="#a07840" stroke-width="1.5"/>
+            <path d="M7 4v4M7 10h.01" stroke="#a07840" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Speak clearly and at a normal pace. Don't rush through words.
+        </div>
+        <div class="tip-item">
+          <svg class="tip-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 7h10M7 2l5 5-5 5" stroke="#3d3733" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          You must say each word correctly before moving to the next.
+        </div>
+        <div class="tip-item">
+          <svg class="tip-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <rect x="1" y="1" width="12" height="12" rx="2" stroke="#3d3733" stroke-width="1.5"/>
+            <path d="M4 7l2 2 4-4" stroke="#3d3733" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Make sure your microphone is working and the room is quiet.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ─── FOOTER ───────────────────────────────────────────────── -->
+<footer>
+  <span>SpeakUp — English Speaking Practice</span>
+  <span>Powered by Web Speech API · For best results use Chrome or Edge</span>
+</footer>
+
+<!-- ─── SCRIPT ───────────────────────────────────────────────── -->
+<script>
+  // ── PRESETS ─────────────────────────────────────────────────
+  const PRESETS = [
+    {
+      title: "Daily Conversation",
+      text: "Good morning! How are you doing today? I hope you had a great night's sleep. Would you like to have some coffee or tea before we get started? The weather looks beautiful outside, so maybe we could take a short walk later."
+    },
+    {
+      title: "Business English",
+      text: "Thank you for joining this meeting. I'd like to discuss our quarterly performance and outline the key priorities for the next three months. Our team has made significant progress, and I'm confident we will achieve our targets."
+    },
+    {
+      title: "Travel Phrases",
+      text: "Excuse me, could you tell me how to get to the nearest train station? I'm looking for a hotel that is close to the city center. Could you please recommend a good restaurant for dinner? I would prefer somewhere that serves local cuisine."
+    },
+    {
+      title: "News Article",
+      text: "Scientists have announced a major breakthrough in renewable energy technology. The new solar panels are twice as efficient as existing models and cost significantly less to produce. Experts believe this discovery could accelerate the transition to clean energy worldwide."
+    },
+    {
+      title: "Tongue Twisters",
+      text: "She sells seashells by the seashore. Peter Piper picked a peck of pickled peppers. How much wood would a woodchuck chuck if a woodchuck could chuck wood? Red lorry yellow lorry."
+    }
+  ];
+
+  let selectedPresetIdx = 0;
+  let currentText = '';
+  let words = [];
+  let currentWordIdx = 0;
+  let isRecording = false;
+  let recognition = null;
+  let correctCount = 0;
+  let retryCount = 0;
+  let totalAttempts = 0;
+  let currentWordAttempts = 0;
+  let isCustom = false;
+
+  // Pronunciation hints
+  const HINTS = {
+    'the': { sym: '/ðə/', hint: 'Voiced "th" sound — place tongue between teeth.' },
+    'a': { sym: '/eɪ/', hint: 'When used as the letter "a", say "ay".' },
+    'their': { sym: '/ðɛr/', hint: 'Sounds like "there" — voiced "th".' },
+    'through': { sym: '/θruː/', hint: 'Rhymes with "crew" — unvoiced "th".' },
+    'thought': { sym: '/θɔːt/', hint: 'Unvoiced "th" + "awt" sound.' },
+    'world': { sym: '/wɜːrld/', hint: 'Round your lips for the "w", curved "r".' },
+    'three': { sym: '/θriː/', hint: 'Tongue between teeth for "th", then "ree".' },
+    'this': { sym: '/ðɪs/', hint: 'Voiced "th" — like "the" + "is".' },
+    'that': { sym: '/ðæt/', hint: 'Voiced "th" + short "a" sound.' },
+    'which': { sym: '/wɪtʃ/', hint: '"W" sound + "itch" at the end.' },
+    'quarterly': { sym: '/ˈkwɔːrtərli/', hint: 'Stress on first syllable: QUAR-ter-ly.' },
+    'significant': { sym: '/sɪɡˈnɪfɪkənt/', hint: 'Stress on second syllable: sig-NIF-i-cant.' },
+    'accelerate': { sym: '/əkˈsɛləreɪt/', hint: 'Stress on second syllable: ac-CEL-er-ate.' },
+    'seashells': { sym: '/ˈsiːʃɛlz/', hint: 'Two words joined: "sea" + "shells".' },
+    'woodchuck': { sym: '/ˈwʊdtʃʌk/', hint: 'Stress on first syllable: WOOD-chuck.' },
+  };
+
+  // ── INIT ─────────────────────────────────────────────────────
+  window.onload = () => {
+    updatePresetPreview(0);
+    setupSpeechRecognition();
+  };
+
+  function updatePresetPreview(idx) {
+    const el = document.getElementById('presetPreview');
+    if (idx === 5) {
+      el.textContent = '';
+      document.getElementById('customTextArea').style.display = 'block';
+    } else {
+      document.getElementById('customTextArea').style.display = 'none';
+      el.textContent = '"' + PRESETS[idx].text.substring(0, 100) + '..."';
+    }
+  }
+
+  function selectPreset(idx, btn) {
+    selectedPresetIdx = idx;
+    isCustom = idx === 5;
+    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    updatePresetPreview(idx);
+  }
+
+  function loadSelectedText() {
+    let text = '';
+    if (isCustom) {
+      text = document.getElementById('customTextArea').value.trim();
+      if (!text) { showToast('Please enter some text first.', 'warning'); return; }
+    } else {
+      text = PRESETS[selectedPresetIdx].text;
+    }
+    currentText = text;
+    loadText(text);
+    showToast('Text loaded. Press Start Practice!', 'success');
+  }
+
+  function loadText(text) {
+    stopPractice();
+    words = text.split(/\s+/).filter(w => w.length > 0);
+    currentWordIdx = 0;
+    correctCount = 0;
+    retryCount = 0;
+    totalAttempts = 0;
+    currentWordAttempts = 0;
+    renderWords();
+    updateStats();
+    setStatus('idle', 'Text loaded. Press Start Practice when ready.');
+  }
+
+  // ── RENDER WORDS ─────────────────────────────────────────────
+  function renderWords() {
+    const container = document.getElementById('wordsContainer');
+    container.innerHTML = words.map((w, i) => {
+      let cls = 'pending';
+      if (i < currentWordIdx) cls = 'correct';
+      else if (i === currentWordIdx) cls = 'current';
+      return `<span class="word ${cls}" id="word-${i}">${w}</span>`;
+    }).join(' ');
+    updateProgress();
+  }
+
+  function markWord(idx, status) {
+    const el = document.getElementById('word-' + idx);
+    if (!el) return;
+    el.className = 'word ' + status;
+    if (status === 'wrong') {
+      void el.offsetWidth; // restart animation
+      el.className = 'word wrong';
+    }
+  }
+
+  function updateProgress() {
+    const pct = words.length > 0 ? (currentWordIdx / words.length) * 100 : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+  }
+
+  // ── SPEECH RECOGNITION ───────────────────────────────────────
+  function setupSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setStatus('error', 'Speech Recognition not supported. Use Chrome or Edge.');
+      document.getElementById('playBtn').disabled = true;
+      return;
+    }
+
+    recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 5;
+
+    recognition.onstart = () => {
+      isRecording = true;
+      setStatus('active', 'Listening... Speak the highlighted word.');
+      document.getElementById('playBtn').classList.add('recording');
+      document.getElementById('waveform').classList.add('active');
+    };
+
+    recognition.onend = () => {
+      if (isRecording) {
+        // Auto-restart to keep listening
+        try { recognition.start(); } catch(e) {}
+      } else {
+        document.getElementById('playBtn').classList.remove('recording');
+        document.getElementById('waveform').classList.remove('active');
+      }
+    };
+
+    recognition.onerror = (e) => {
+      if (e.error === 'no-speech') return;
+      if (e.error === 'not-allowed') {
+        setStatus('error', 'Microphone access denied. Please allow microphone access.');
+        isRecording = false;
+      }
+    };
+
+    recognition.onresult = (e) => {
+      if (!isRecording || currentWordIdx >= words.length) return;
+
+      let finalTranscript = '';
+      let interimTranscript = '';
+      let allAlternatives = [];
+
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const result = e.results[i];
+        if (result.isFinal) {
+          finalTranscript += result[0].transcript + ' ';
+          // Collect all alternatives
+          for (let j = 0; j < result.length; j++) {
+            allAlternatives.push(result[j].transcript.trim());
+          }
+        } else {
+          interimTranscript += result[0].transcript;
+        }
+      }
+
+      // Show interim heard text
+      const heard = (finalTranscript || interimTranscript).trim();
+      if (heard) document.getElementById('heardText').textContent = '"' + heard + '"';
+
+      if (finalTranscript.trim()) {
+        totalAttempts++;
+        currentWordAttempts++;
+        processSpokenText(finalTranscript.trim(), allAlternatives);
+      }
+    };
+  }
+
+  // ── CORE MATCHING LOGIC ──────────────────────────────────────
+  function normalizeWord(w) {
+    return w.toLowerCase()
+            .replace(/[.,!?;:'"()[\]{}\-–—]/g, '')
+            .replace(/'s$|'t$|'re$|'ve$|'ll$|'d$|n't$/i, '')
+            .trim();
+  }
+
+  function levenshtein(a, b) {
+    const dp = Array.from({length: a.length + 1}, (_, i) =>
+      Array.from({length: b.length + 1}, (_, j) => i === 0 ? j : j === 0 ? i : 0)
+    );
+    for (let i = 1; i <= a.length; i++) {
+      for (let j = 1; j <= b.length; j++) {
+        dp[i][j] = a[i-1] === b[j-1]
+          ? dp[i-1][j-1]
+          : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+      }
+    }
+    return dp[a.length][b.length];
+  }
+
+  function wordMatch(spoken, target) {
+    const s = normalizeWord(spoken);
+    const t = normalizeWord(target);
+    if (!s || !t) return false;
+    if (s === t) return true;
+
+    // Homophone map
+    const homophones = {
+      'their': ['there', 'they\'re', 'theyre'],
+      'there': ['their', 'they\'re', 'theyre'],
+      'to': ['too', 'two'],
+      'too': ['to', 'two'],
+      'two': ['to', 'too'],
+      'for': ['four', 'fore'],
+      'four': ['for', 'fore'],
+      'by': ['bye', 'buy'],
+      'bye': ['by', 'buy'],
+      'buy': ['by', 'bye'],
+      'sea': ['see', 'si'],
+      'see': ['sea'],
+      'here': ['hear'],
+      'hear': ['here'],
+      'write': ['right', 'rite'],
+      'right': ['write', 'rite'],
+      'know': ['no'],
+      'no': ['know'],
+      'new': ['knew', 'gnu'],
+      'knew': ['new'],
+      'one': ['won'],
+      'won': ['one'],
+      'its': ["it's", 'its'],
+      "it's": ['its'],
+      'theyre': ['their', 'there'],
+      'were': ["we're"],
+      'were': ['where'],
+      'your': ["you're", 'youre'],
+      "you're": ['your', 'youre'],
+    };
+
+    if ((homophones[t] || []).includes(s)) return true;
+    if ((homophones[s] || []).includes(t)) return true;
+
+    // Fuzzy: allow 1 edit for words >= 5 chars, 0 for short
+    const maxDist = t.length >= 8 ? 2 : t.length >= 5 ? 1 : 0;
+    const dist = levenshtein(s, t);
+    if (dist <= maxDist) return true;
+
+    // Phonetic similarity: common confusions
+    const phoneticMap = (w) => w
+      .replace(/ph/g, 'f').replace(/ck/g, 'k').replace(/qu/g, 'kw')
+      .replace(/wh/g, 'w').replace(/tion/g, 'shun').replace(/sion/g, 'shun')
+      .replace(/ious/g, 'us').replace(/ough/g, 'o').replace(/gh/g, '')
+      .replace(/kn/g, 'n').replace(/wr/g, 'r').replace(/mb$/g, 'm')
+      .replace(/ee|ea|ie/g, 'i').replace(/oo/g, 'u').replace(/oa/g, 'o')
+      .replace(/ai|ay/g, 'a').replace(/([aeiou])r/g, '$1').replace(/x/g, 'ks');
+
+    if (phoneticMap(s) === phoneticMap(t)) return true;
+
+    return false;
+  }
+
+  function processSpokenText(transcript, alternatives = []) {
+    if (currentWordIdx >= words.length) return;
+
+    const target = words[currentWordIdx];
+    const spokenWords = transcript.trim().split(/\s+/);
+
+    // Try all spoken words and all alternatives
+    let matched = false;
+
+    // Check each spoken word against target
+    for (const sw of spokenWords) {
+      if (wordMatch(sw, target)) { matched = true; break; }
+    }
+
+    // Check alternatives
+    if (!matched) {
+      for (const alt of alternatives) {
+        const altWords = alt.split(/\s+/);
+        for (const aw of altWords) {
+          if (wordMatch(aw, target)) { matched = true; break; }
+        }
+        if (matched) break;
+      }
+    }
+
+    if (matched) {
+      // CORRECT
+      markWord(currentWordIdx, 'correct');
+      correctCount++;
+      currentWordIdx++;
+      currentWordAttempts = 0;
+      document.getElementById('heardText').textContent = '';
+      updateStats();
+      updatePhonetic();
+
+      if (currentWordIdx >= words.length) {
+        // All done!
+        setTimeout(showComplete, 400);
+        stopPractice();
+      } else {
+        markWord(currentWordIdx, 'current');
+        updateProgress();
+        setStatus('active', `✓ Correct! Now say: "${words[currentWordIdx]}"`);
+        showToast(`✓ "${target}" — Correct!`, 'success');
+      }
+    } else {
+      // WRONG
+      retryCount++;
+      updateStats();
+      markWord(currentWordIdx, 'wrong');
+
+      const hint = currentWordAttempts >= 2
+        ? ` (Tip: try saying "${target}" more slowly)`
+        : '';
+      setStatus('error', `✗ Not quite. Please say: "${target}"${hint}`);
+      showToast(`✗ Say "${target}" again`, 'error');
+
+      // Flash back to current after shake
+      setTimeout(() => {
+        if (currentWordIdx < words.length) markWord(currentWordIdx, 'current');
+      }, 400);
+    }
+  }
+
+  // ── CONTROLS ─────────────────────────────────────────────────
+  function startPractice() {
+    if (!currentText) { showToast('Please load a text first!', 'warning'); return; }
+    if (currentWordIdx >= words.length) { showToast('Text complete! Reset to practice again.', 'warning'); return; }
+    if (!recognition) { showToast('Speech Recognition not available.', 'error'); return; }
+
+    isRecording = true;
+    document.getElementById('playBtn').disabled = true;
+    document.getElementById('stopBtn').disabled = false;
+    markWord(currentWordIdx, 'current');
+    updatePhonetic();
+    setStatus('active', `Listening... Say: "${words[currentWordIdx]}"`);
+
+    try { recognition.start(); } catch(e) {}
+  }
+
+  function stopPractice() {
+    isRecording = false;
+    if (recognition) { try { recognition.stop(); } catch(e) {} }
+    document.getElementById('playBtn').disabled = false;
+    document.getElementById('playBtn').classList.remove('recording');
+    document.getElementById('stopBtn').disabled = true;
+    document.getElementById('waveform').classList.remove('active');
+    document.getElementById('heardText').textContent = '';
+    if (words.length > 0 && currentWordIdx < words.length) {
+      setStatus('idle', `Paused. Say "${words[currentWordIdx]}" when ready.`);
+    }
+  }
+
+  function resetAll() {
+    stopPractice();
+    document.getElementById('completeOverlay').classList.remove('show');
+    if (currentText) {
+      loadText(currentText);
+    } else {
+      currentWordIdx = 0;
+      correctCount = 0;
+      retryCount = 0;
+      totalAttempts = 0;
+      updateStats();
+    }
+    setStatus('idle', 'Reset complete. Press Start Practice when ready.');
+    document.getElementById('phoneticWord').textContent = '—';
+    document.getElementById('phoneticSymbol').textContent = '';
+    document.getElementById('phoneticHint').textContent = 'Start speaking to see pronunciation tips here.';
+  }
+
+  // ── UI HELPERS ───────────────────────────────────────────────
+  function setStatus(type, msg) {
+    const dot = document.getElementById('statusDot');
+    const text = document.getElementById('statusText');
+    dot.className = 'status-dot';
+    if (type === 'active') dot.classList.add('active');
+    else if (type === 'success') dot.classList.add('success');
+    else if (type === 'error') dot.classList.add('error');
+    text.textContent = msg;
+  }
+
+  let toastTimer = null;
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'feedback-toast show ' + type;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.classList.remove('show'); }, 2200);
+  }
+
+  function updateStats() {
+    document.getElementById('statCorrect').textContent = correctCount;
+    document.getElementById('statWrong').textContent = retryCount;
+    document.getElementById('statProgress').textContent = currentWordIdx + '/' + (words.length || 0);
+    const acc = totalAttempts > 0
+      ? Math.round((correctCount / totalAttempts) * 100) + '%'
+      : '—';
+    document.getElementById('statAccuracy').textContent = acc;
+  }
+
+  function updatePhonetic() {
+    if (currentWordIdx >= words.length) return;
+    const w = words[currentWordIdx];
+    const wLower = normalizeWord(w);
+    const hint = HINTS[wLower];
+
+    document.getElementById('phoneticWord').textContent = w;
+    document.getElementById('phoneticSymbol').textContent = hint ? hint.sym : '';
+    document.getElementById('phoneticHint').textContent = hint
+      ? hint.hint
+      : 'Say this word clearly and naturally.';
+  }
+
+  function showComplete() {
+    const acc = totalAttempts > 0
+      ? Math.round((correctCount / totalAttempts) * 100) + '%'
+      : '100%';
+    document.getElementById('finalWords').textContent = correctCount;
+    document.getElementById('finalAttempts').textContent = totalAttempts;
+    document.getElementById('finalAccuracy').textContent = acc;
+    document.getElementById('completeOverlay').classList.add('show');
+  }
+
+  // ── KEYBOARD SHORTCUTS ────────────────────────────────────────
+  document.addEventListener('keydown', (e) => {
+    if (e.key === ' ' && e.target.tagName !== 'TEXTAREA') {
+      e.preventDefault();
+      if (!isRecording && currentText) startPractice();
+      else if (isRecording) stopPractice();
+    }
+    if (e.key === 'Escape') stopPractice();
+  });
+
+  // init preview
+  updatePresetPreview(0);
+</script>
+</body>
+</html>
