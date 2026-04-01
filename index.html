@@ -704,39 +704,92 @@
   footer {
     position: relative;
     z-index: 10;
-    padding: 0;
-    border-top: 1px solid var(--border);
+    background-color: var(--ink);
+    color: var(--paper);
+    padding: 4rem 0 0 0;
+    margin-top: auto;
+  }
+
+  .footer-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 3rem;
   }
 
   .footer-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 3rem;
-    border-bottom: 1px solid var(--border);
+    padding-bottom: 2.5rem;
+    border-bottom: 1px solid #f5f0e81a;
+  }
+
+  .footer-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .footer-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--paper);
+    letter-spacing: -0.02em;
+  }
+  
+  .footer-title span {
+      color: var(--accent);
+  }
+
+  .footer-desc {
     font-family: 'DM Mono', monospace;
-    font-size: 0.62rem;
-    letter-spacing: 0.1em;
-    color: var(--ink-soft);
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: var(--paper-dark);
+    opacity: 0.8;
+  }
+
+  .footer-tech {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--paper-dark);
+    opacity: 0.8;
+  }
+
+  .footer-tech span {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
   }
 
   .footer-dev {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 1.25rem;
-    padding: 0.85rem 3rem;
-    background: var(--ink);
-    color: #c8bfad99;
+    justify-content: space-between;
+    padding: 1.5rem 3rem;
+    background: var(--ink-soft);
     font-family: 'DM Mono', monospace;
-    font-size: 0.62rem;
+    font-size: 0.65rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
+    color: var(--paper-dark);
+  }
+
+  .footer-creator {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
   }
 
   .footer-dev-name {
     font-family: 'Playfair Display', serif;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     font-weight: 700;
     font-style: italic;
     color: var(--gold-pale);
@@ -744,13 +797,138 @@
     text-transform: none;
   }
 
-  .footer-dev-sep {
-    width: 1px;
-    height: 14px;
-    background: #ffffff22;
+  .footer-dev-heart { color: var(--accent); animation: heartbeat 2s infinite; }
+  
+  @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      10%, 30% { transform: scale(1.1); }
+      20%, 40% { transform: scale(1); }
   }
 
-  .footer-dev-heart { color: var(--accent); }
+  /* ─── DICTIONARY MODAL ─────────────────────────────────────── */
+  .dict-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 1000;
+    display: none;
+  }
+
+  .dict-modal-overlay.active {
+    display: block;
+  }
+
+  .dict-modal {
+    position: absolute;
+    background: #1e1a16;
+    border: 1px solid rgba(200, 191, 173, 0.18);
+    border-radius: 6px;
+    width: 320px;
+    max-height: 380px;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.65);
+    color: var(--paper);
+    font-family: 'DM Sans', sans-serif;
+    padding: 1.25rem 1.4rem 1.1rem;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+  }
+
+  .dict-modal-overlay.active .dict-modal {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .dict-close-btn {
+    position: absolute;
+    top: 0.9rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: rgba(200, 191, 173, 0.5);
+    font-size: 1.15rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    transition: color 0.2s;
+  }
+  .dict-close-btn:hover { color: var(--paper); }
+
+  .dict-header {
+    padding: 0;
+    border-bottom: none;
+    margin-bottom: 0.85rem;
+  }
+
+  .dict-word {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin: 0 0 0.15rem 0;
+    color: var(--paper);
+  }
+
+  .dict-phonetic {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    color: rgba(200, 191, 173, 0.6);
+  }
+
+  .dict-body {
+    padding: 0;
+  }
+
+  .dict-meaning {
+    margin-top: 0.7rem;
+  }
+
+  .dict-pos {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .dict-def-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .dict-def-item {
+    margin-bottom: 0.6rem;
+  }
+
+  .dict-definition {
+    font-size: 0.92rem;
+    line-height: 1.45;
+    font-weight: 600;
+    color: var(--paper);
+    margin-bottom: 0.25rem;
+  }
+
+  .dict-example {
+    font-style: italic;
+    font-weight: 400;
+    color: rgba(200, 191, 173, 0.55);
+    font-size: 0.85rem;
+    border-left: 2px solid rgba(200, 191, 173, 0.2);
+    padding-left: 0.75rem;
+    margin-left: 0.15rem;
+    margin-top: 0.2rem;
+  }
+
+  /* Make words clickable */
+  .words-container .word {
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .words-container .word:hover {
+    color: var(--accent);
+  }
 
   /* ─── RESPONSIVE ─────────────────────────────────────────── */
   @media (max-width: 900px) {
@@ -758,6 +936,9 @@
     header { padding: 1.5rem; }
     .words-container { font-size: 1.3rem; }
     .preset-grid { grid-template-columns: 1fr 1fr; }
+    .footer-top { flex-direction: column; align-items: flex-start; gap: 2rem; padding-bottom: 2rem; }
+    .footer-tech { flex-wrap: wrap; gap: 1rem; }
+    .footer-dev { flex-direction: column; gap: 1.25rem; text-align: center; }
   }
 </style>
 
@@ -771,6 +952,21 @@
 
 <!-- ─── FEEDBACK TOAST ──────────────────────────────────────── -->
 <div class="feedback-toast" id="toast"></div>
+
+<!-- ─── DICTIONARY MODAL ────────────────────────────────────── -->
+<div class="dict-modal-overlay" id="dictModalOverlay" onclick="closeDictionary()">
+  <div class="dict-modal" onclick="event.stopPropagation()">
+    <button class="dict-close-btn" onclick="closeDictionary()">&times;</button>
+    <div class="dict-content" id="dictContent">
+      <div class="dict-header">
+        <h2 class="dict-word" id="dictWord">Loading...</h2>
+        <div class="dict-phonetic" id="dictPhonetic"></div>
+      </div>
+      <div class="dict-body" id="dictBody">
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ─── COMPLETE OVERLAY ────────────────────────────────────── -->
 <div class="complete-overlay" id="completeOverlay">
@@ -998,29 +1194,43 @@
 
 <!-- ─── FOOTER ───────────────────────────────────────────────── -->
 <footer>
-  <div class="footer-top">
-    <span>SpeakUp &mdash; English Speaking Practice</span>
-    <span>Powered by Web Speech API &nbsp;&middot;&nbsp; Best on Chrome &amp; Edge</span>
+  <div class="footer-container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-title">Speak<span>Up</span></div>
+        <div class="footer-desc">Master your English pronunciation with confidence.</div>
+      </div>
+      <div class="footer-tech">
+        <span>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle cx="6.5" cy="6.5" r="5.5" stroke="#c8bfad" stroke-width="1.1" opacity="0.5"/>
+            <path d="M4 5.5c0-1.38 1.12-2.5 2.5-2.5S9 4.12 9 5.5c0 2.5-2.5 4-2.5 4S4 8 4 5.5z" stroke="#c8bfad" stroke-width="1.1" opacity="0.5"/>
+            <line x1="2" y1="6.5" x2="11" y2="6.5" stroke="#c8bfad" stroke-width="1.1" opacity="0.5"/>
+          </svg>
+          Best on Chrome
+        </span>
+        <span>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M7 1v12zM1 7h12z" stroke="#c8bfad" stroke-width="1.1" opacity="0.5" stroke-linecap="round"/>
+            <circle cx="7" cy="7" r="4.5" stroke="#c8bfad" stroke-width="1.1" opacity="0.5" stroke-dasharray="2 2"/>
+          </svg>
+          Web Speech API
+        </span>
+      </div>
+    </div>
   </div>
   <div class="footer-dev">
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-      <rect x="1" y="3" width="12" height="9" rx="1.5" stroke="#c9a96e" stroke-width="1.2"/>
-      <path d="M4 3V2.5a3 3 0 0 1 6 0V3" stroke="#c9a96e" stroke-width="1.2"/>
-      <circle cx="7" cy="7.5" r="1.2" fill="#c9a96e"/>
-    </svg>
-    <span>Crafted with</span>
-    <svg class="footer-dev-heart" width="13" height="13" viewBox="0 0 13 13" fill="none">
-      <path d="M6.5 11S1 7.5 1 4a2.5 2.5 0 0 1 5.5-.5A2.5 2.5 0 0 1 12 4c0 3.5-5.5 7-5.5 7z" fill="#c0392b"/>
-    </svg>
-    <span>by</span>
-    <span class="footer-dev-name">Marr</span>
-    <div class="footer-dev-sep"></div>
-    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-      <circle cx="6.5" cy="6.5" r="5.5" stroke="#c8bfad" stroke-width="1.1" opacity="0.5"/>
-      <path d="M4 5.5c0-1.38 1.12-2.5 2.5-2.5S9 4.12 9 5.5c0 2.5-2.5 4-2.5 4S4 8 4 5.5z" stroke="#c8bfad" stroke-width="1.1" opacity="0.5"/>
-      <line x1="2" y1="6.5" x2="11" y2="6.5" stroke="#c8bfad" stroke-width="1.1" opacity="0.5"/>
-    </svg>
-    <span>speakup &copy; 2025</span>
+    <div class="footer-creator">
+      <span>Crafted with</span>
+      <svg class="footer-dev-heart" width="13" height="13" viewBox="0 0 13 13" fill="none">
+        <path d="M6.5 11S1 7.5 1 4a2.5 2.5 0 0 1 5.5-.5A2.5 2.5 0 0 1 12 4c0 3.5-5.5 7-5.5 7z" fill="#c0392b"/>
+      </svg>
+      <span>by</span>
+      <span class="footer-dev-name">Marr</span>
+    </div>
+    <div class="footer-copyright">
+      <span>SpeakUp &copy; 2025 &mdash; All Rights Reserved</span>
+    </div>
   </div>
 </footer>
 
@@ -1152,11 +1362,11 @@
       if (i < currentWordIdx) cls = 'correct';
       else if (i === currentWordIdx) cls = 'current';
       return `<span class="word-wrap" id="wrap-${i}">` +
-        `<button class="tts-btn" id="tts-${i}" onclick="speakWord('${w.replace(/'/g,"\'")}', ${i})" title="Hear pronunciation" tabindex="-1">` +
+        `<button class="tts-btn" id="tts-${i}" onclick="speakWord('${w.replace(/'/g,"&apos;")}', ${i})" title="Hear pronunciation" tabindex="-1">` +
         SPEAKER_SVG +
         `<span class="tts-label">Hear</span>` +
         `</button>` +
-        `<span class="word ${cls}" id="word-${i}">${w}</span>` +
+        `<span class="word ${cls}" id="word-${i}" title="Click to view definition" onclick="openDictionary(this.textContent, event)">${w}</span>` +
         `</span>`;
     }).join('');
     updateProgress();
@@ -1217,6 +1427,95 @@
   function updateProgress() {
     const pct = words.length > 0 ? (currentWordIdx / words.length) * 100 : 0;
     document.getElementById('progressFill').style.width = pct + '%';
+  }
+
+  // ── DICTIONARY FUNCTIONALITY ─────────────────────────────────
+  async function openDictionary(rawWord, event) {
+    // Basic cleaning: convert lowercase and remove most punctuation except hyphens
+    const word = rawWord.toLowerCase().replace(/[^a-z-]/gi, '');
+    if (!word) return;
+
+    const overlay = document.getElementById('dictModalOverlay');
+    const modal = document.querySelector('.dict-modal');
+    const dictWord = document.getElementById('dictWord');
+    const dictPhonetic = document.getElementById('dictPhonetic');
+    const dictBody = document.getElementById('dictBody');
+
+    if (event) {
+      const rect = event.target.getBoundingClientRect();
+      const popupWidth = 320;
+      let topPos = rect.bottom + 10;
+      let leftPos = rect.left + (rect.width / 2) - (popupWidth / 2);
+
+      // Horizontal bounds
+      if (leftPos < 10) leftPos = 10;
+      if (leftPos + popupWidth > window.innerWidth - 10) {
+        leftPos = window.innerWidth - popupWidth - 10;
+      }
+      
+      modal.style.top = topPos + 'px';
+      modal.style.left = leftPos + 'px';
+    }
+
+    dictWord.textContent = word;
+    dictPhonetic.textContent = 'Loading...';
+    dictBody.innerHTML = '';
+    overlay.classList.add('active');
+    
+    // Handle exact bottom overflow post-render
+    if (event) {
+      const rect = event.target.getBoundingClientRect();
+      const modalRect = modal.getBoundingClientRect();
+      if (rect.bottom + 10 + modalRect.height > window.innerHeight) {
+        let newTop = rect.top - 10 - modalRect.height;
+        if (newTop > 10) modal.style.top = newTop + 'px';
+      }
+    }
+
+    try {
+      const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+      if (!res.ok) throw new Error('Word not found');
+      
+      const data = await res.json();
+      const entry = data[0];
+      
+      dictWord.textContent = entry.word;
+      
+      // Find a phonetic text
+      let phonetic = entry.phonetic || '';
+      if (!phonetic && entry.phonetics) {
+          const pt = entry.phonetics.find(p => p.text);
+          if (pt) phonetic = pt.text;
+      }
+      dictPhonetic.textContent = phonetic;
+      
+      let bodyHtml = '';
+      entry.meanings.forEach(meaning => {
+        bodyHtml += `<div class="dict-meaning">`;
+        bodyHtml += `<div class="dict-pos">${meaning.partOfSpeech}</div>`;
+        bodyHtml += `<ul class="dict-def-list">`;
+        // Take up to 2 definitions per part-of-speech
+        meaning.definitions.slice(0, 2).forEach(def => {
+          bodyHtml += `<li class="dict-def-item">`;
+          bodyHtml += `<div class="dict-definition">${def.definition}</div>`;
+          if (def.example) {
+            bodyHtml += `<div class="dict-example">"${def.example}"</div>`;
+          }
+          bodyHtml += `</li>`;
+        });
+        bodyHtml += `</ul></div>`;
+      });
+      dictBody.innerHTML = bodyHtml;
+
+    } catch (e) {
+      dictPhonetic.textContent = '';
+      dictBody.innerHTML = `<div style="color: var(--paper-dark); margin-top: 1rem;">No definition found for "${word}".</div>`;
+    }
+  }
+
+  function closeDictionary() {
+    const overlay = document.getElementById('dictModalOverlay');
+    overlay.classList.remove('active');
   }
 
   // ── SPEECH RECOGNITION ───────────────────────────────────────
