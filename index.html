@@ -1348,7 +1348,7 @@
 
         isRestarting = true;
         setStatus('active', 'Microphone changed — reconnecting...');
-        showToast('🎧 New mic detected, reconnecting...', 'warning');
+        showToast('New mic detected, reconnecting...', 'warning');
 
         // Stop old instance cleanly
         try { recognition.abort(); } catch(e) {}
@@ -1362,7 +1362,7 @@
 
         try {
           recognition.start();
-          showToast('✓ Microphone reconnected!', 'success');
+          showToast('Microphone reconnected!', 'success');
         } catch(e) {
           setStatus('error', 'Failed to reconnect mic. Press Stop then Start again.');
           isRecording = false;
@@ -1460,37 +1460,49 @@
   function processSpokenText(transcript, alternatives = []) {
     if (currentWordIdx >= words.length) return;
 
-    const target = words[currentWordIdx];
-    const spokenWords = transcript.trim().split(/\s+/);
-
-    // Try all spoken words and all alternatives
-    let matched = false;
-
-    // Check each spoken word against target
-    for (const sw of spokenWords) {
-      if (wordMatch(sw, target)) { matched = true; break; }
+    // Collect all spoken phrases: transcript + alternatives
+    const allPhrases = [transcript.trim()];
+    for (const alt of alternatives) {
+      const a = alt.trim();
+      if (a && !allPhrases.includes(a)) allPhrases.push(a);
     }
 
-    // Check alternatives
-    if (!matched) {
-      for (const alt of alternatives) {
-        const altWords = alt.split(/\s+/);
-        for (const aw of altWords) {
-          if (wordMatch(aw, target)) { matched = true; break; }
+    // Try to match multiple consecutive words from the spoken phrase
+    let bestMatchCount = 0;
+
+    for (const phrase of allPhrases) {
+      const spokenWords = phrase.split(/\s+/);
+      let matchCount = 0;
+      let wordPtr = currentWordIdx;
+
+      // Walk through spoken words and try to match sequentially
+      for (let si = 0; si < spokenWords.length && wordPtr < words.length; si++) {
+        if (wordMatch(spokenWords[si], words[wordPtr])) {
+          matchCount++;
+          wordPtr++;
         }
-        if (matched) break;
+      }
+
+      if (matchCount > bestMatchCount) {
+        bestMatchCount = matchCount;
       }
     }
 
-    if (matched) {
-      // CORRECT
-      markWord(currentWordIdx, 'correct');
-      correctCount++;
-      currentWordIdx++;
+    if (bestMatchCount > 0) {
+      // Mark all matched words as correct
+      for (let m = 0; m < bestMatchCount; m++) {
+        markWord(currentWordIdx, 'correct');
+        correctCount++;
+        currentWordIdx++;
+      }
       currentWordAttempts = 0;
       document.getElementById('heardText').textContent = '';
       updateStats();
       updatePhonetic();
+
+      if (bestMatchCount > 1) {
+        showToast(`${bestMatchCount} words correct!`, 'success');
+      }
 
       if (currentWordIdx >= words.length) {
         // All done!
@@ -1499,11 +1511,14 @@
       } else {
         markWord(currentWordIdx, 'current');
         updateProgress();
-        setStatus('active', `✓ Correct! Now say: "${words[currentWordIdx]}"`);
-        showToast(`✓ "${target}" — Correct!`, 'success');
+        setStatus('active', `Correct! Now say: "${words[currentWordIdx]}"`);
+        if (bestMatchCount <= 1) {
+          showToast(`"${words[currentWordIdx - 1]}" -- Correct!`, 'success');
+        }
       }
     } else {
       // WRONG
+      const target = words[currentWordIdx];
       retryCount++;
       updateStats();
       markWord(currentWordIdx, 'wrong');
@@ -1511,8 +1526,8 @@
       const hint = currentWordAttempts >= 2
         ? ` (Tip: try saying "${target}" more slowly)`
         : '';
-      setStatus('error', `✗ Not quite. Please say: "${target}"${hint}`);
-      showToast(`✗ Say "${target}" again`, 'error');
+      setStatus('error', `Not quite. Please say: "${target}"${hint}`);
+      showToast(`Say "${target}" again`, 'error');
 
       // Flash back to current after shake
       setTimeout(() => {
@@ -1525,8 +1540,31 @@
   // ── MICROPHONE PERMISSION (critical for Android) ─────────────
   let micPermissionGranted = false;
 
+  function isSecureContext() {
+    // Mic only works on HTTPS, localhost, or 127.0.0.1
+    if (window.isSecureContext) return true;
+    const h = location.hostname;
+    return h === 'localhost' || h === '127.0.0.1' || h === '[::1]' || location.protocol === 'https:';
+  }
+
   async function requestMicPermission() {
     if (micPermissionGranted) return true;
+
+    // Check secure context first
+    if (!isSecureContext()) {
+      setStatus('error', 'Microphone requires HTTPS. Open this site via HTTPS (e.g. GitHub Pages) to use mic on mobile.');
+      showToast('HTTPS required for microphone on mobile!', 'error');
+      return false;
+    }
+
+    // Check if getUserMedia is available
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      // On some Android browsers, getUserMedia may not exist but SpeechRecognition still works
+      // Try to proceed without explicit permission request
+      micPermissionGranted = true;
+      return true;
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       // Stop the stream immediately — we only needed the permission prompt
@@ -1534,8 +1572,19 @@
       micPermissionGranted = true;
       return true;
     } catch (err) {
-      console.error('Mic permission denied:', err);
-      micPermissionGranted = false;
+      console.error('Mic permission error:', err.name, err.message);
+
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        setStatus('error', 'Microphone blocked. Tap the lock icon in your browser address bar and allow microphone.');
+        showToast('Mic blocked! Tap lock icon in address bar to allow.', 'error');
+      } else if (err.name === 'NotFoundError') {
+        setStatus('error', 'No microphone detected on this device.');
+        showToast('No microphone found!', 'error');
+      } else {
+        // Unknown error — try to proceed anyway (SpeechRecognition might handle it)
+        micPermissionGranted = true;
+        return true;
+      }
       return false;
     }
   }
@@ -1548,18 +1597,14 @@
     // Request mic permission explicitly (required on Android)
     setStatus('active', 'Requesting microphone access...');
     const hasPermission = await requestMicPermission();
-    if (!hasPermission) {
-      setStatus('error', 'Microphone access denied. Please allow mic access in your browser settings and try again.');
-      showToast('Microphone access denied. Check browser permissions.', 'error');
-      return;
-    }
+    if (!hasPermission) return;
 
     isRecording = true;
     document.getElementById('playBtn').disabled = true;
     document.getElementById('stopBtn').disabled = false;
     markWord(currentWordIdx, 'current');
     updatePhonetic();
-    setStatus('active', `Listening... Say: "${words[currentWordIdx]}"`);
+    setStatus('active', `Listening... Speak naturally, you can say full phrases.`);
 
     try { recognition.start(); } catch(e) {
       console.error('Recognition start error:', e);
