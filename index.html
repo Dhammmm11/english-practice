@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=3.0, user-scalable=yes" />
 <title>SpeakUp — English Speaking Practice</title>
 <link rel="icon" type="image/png" href="img/favicon.png" />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -994,6 +994,45 @@
     header { padding: 1.5rem; }
     .words-container { font-size: 1.3rem; }
     .preset-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* ─── MOBILE (small phones) ─────────────────────────────── */
+  @media (max-width: 480px) {
+    html { font-size: 14px; }
+    header {
+      padding: 1rem 1rem 0.8rem;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.6rem;
+    }
+    .logo-title { font-size: 1.6rem; }
+    .logo-eyebrow { font-size: 0.55rem; }
+    .header-right { width: 100%; justify-content: flex-start; gap: 0.5rem; flex-wrap: wrap; }
+    .badge { font-size: 0.55rem; padding: 0.25rem 0.5rem; }
+    main { padding: 1rem; gap: 1rem; }
+    .section-label { font-size: 0.6rem; }
+    .preset-grid { grid-template-columns: 1fr 1fr; gap: 0.4rem; }
+    .preset-btn { font-size: 0.72rem; padding: 0.5rem 0.6rem; }
+    .words-container { font-size: 1.05rem; padding: 1rem; gap: 0.3rem 0.35rem; }
+    .controls-row { flex-direction: column; gap: 0.5rem; }
+    .btn-play, .btn-stop, .btn-reset { width: 100%; justify-content: center; font-size: 0.75rem; padding: 0.65rem; }
+    .status-bar { flex-direction: column; align-items: flex-start; gap: 0.4rem; padding: 0.6rem 0.8rem; }
+    .waveform-canvas { width: 100%; height: 36px; }
+    .sidebar-card { padding: 0.8rem; }
+    .sidebar-title { font-size: 0.6rem; }
+    .stat-value { font-size: 1.1rem; }
+    .phonetic-word { font-size: 1.3rem; }
+    .complete-card { padding: 1.5rem; margin: 1rem; }
+    .complete-title { font-size: 1.4rem; }
+    .theme-toggle, .sfx-toggle { font-size: 0.55rem; padding: 0.3rem 0.5rem; }
+    footer { padding: 1rem; font-size: 0.55rem; }
+    .dict-popup { width: 95vw; left: 2.5vw; }
+
+    /* Mic permission banner */
+    .mic-permission-banner {
+      padding: 0.6rem 0.8rem;
+      font-size: 0.75rem;
+    }
   }
 </style>
 
@@ -2001,10 +2040,37 @@
   }
 
   // ── CONTROLS ─────────────────────────────────────────────────
-  function startPractice() {
+  // ── MICROPHONE PERMISSION (critical for Android) ─────────────
+  let micPermissionGranted = false;
+
+  async function requestMicPermission() {
+    if (micPermissionGranted) return true;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Stop the stream immediately — we only needed the permission prompt
+      stream.getTracks().forEach(track => track.stop());
+      micPermissionGranted = true;
+      return true;
+    } catch (err) {
+      console.error('Mic permission denied:', err);
+      micPermissionGranted = false;
+      return false;
+    }
+  }
+
+  async function startPractice() {
     if (!currentText) { showToast('Please load a text first!', 'warning'); return; }
     if (currentWordIdx >= words.length) { showToast('Text complete! Reset to practice again.', 'warning'); return; }
     if (!recognition) { showToast('Speech Recognition not available.', 'error'); return; }
+
+    // Request mic permission explicitly (required on Android)
+    setStatus('active', 'Requesting microphone access...');
+    const hasPermission = await requestMicPermission();
+    if (!hasPermission) {
+      setStatus('error', 'Microphone access denied. Please allow mic access in your browser settings and try again.');
+      showToast('Microphone access denied. Check browser permissions.', 'error');
+      return;
+    }
 
     isRecording = true;
     document.getElementById('playBtn').disabled = true;
@@ -2014,7 +2080,13 @@
     setStatus('active', `Listening... Say: "${words[currentWordIdx]}"`);
     playSFX('click');
 
-    try { recognition.start(); } catch(e) {}
+    try { recognition.start(); } catch(e) {
+      console.error('Recognition start error:', e);
+      setStatus('error', 'Failed to start recognition. Tap Start again.');
+      isRecording = false;
+      document.getElementById('playBtn').disabled = false;
+      document.getElementById('stopBtn').disabled = true;
+    }
   }
 
   function stopPractice() {
