@@ -399,7 +399,7 @@ function scheduleInterimFallback(transcript) {
       console.log('[Android Fix] Interim fallback triggered:', lastInterimTranscript);
       totalAttempts++;
       currentWordAttempts++;
-      processSpokenText(lastInterimTranscript, []);
+      processSpokenText(lastInterimTranscript, [], false);
       lastInterimTranscript = '';
       interimStableStartTime = 0;
     }
@@ -510,9 +510,12 @@ function createRecognitionInstance() {
       clearInterimTimeout();
       totalAttempts++;
       currentWordAttempts++;
-      processSpokenText(finalTranscript.trim(), allAlternatives);
+      processSpokenText(finalTranscript.trim(), allAlternatives, false);
     } else if (interimTranscript.trim()) {
-      // Only interim — schedule fallback (critical for Android)
+      // Try processing immediately as interim:
+      // If it matches, it will advance! If not, it just returns without marking wrong.
+      processSpokenText(interimTranscript.trim(), [], true);
+      // Only wait for fallback if Android never fires isFinal and the word hasn't matched
       scheduleInterimFallback(interimTranscript);
     }
   };
@@ -613,7 +616,7 @@ function wordMatch(spoken, target) {
   return false;
 }
 
-function processSpokenText(transcript, alternatives) {
+function processSpokenText(transcript, alternatives, isInterim = false) {
   if (currentWordIdx >= words.length) return;
 
   alternatives = alternatives || [];
@@ -675,6 +678,9 @@ function processSpokenText(transcript, alternatives) {
       }
     }
   } else {
+    // If it's just an interim result, we wait. DON'T mark as wrong.
+    if (isInterim) return;
+
     // WRONG
     const target = words[currentWordIdx];
     retryCount++;
@@ -965,24 +971,14 @@ function loadText(text) {
   updateStats();
   setStatus('idle', 'Text loaded. Press Start Practice when ready.');
 }
-
-
-// ══════════════════════════════════════════════════════════════
-// ── INIT ─────────────────────────────────────────────────────
-// ══════════════════════════════════════════════════════════════
 window.onload = () => {
   initWaveformCanvas();
   updatePresetPreview(0);
   setupSpeechRecognition();
-
-  // Apply saved theme
   const savedTheme = localStorage.getItem('speakup-theme') || 'light';
   applyTheme(savedTheme);
-
-  // Apply saved SFX state
   const sfxBtn = document.getElementById('sfxToggle');
   if (sfxBtn) sfxBtn.classList.toggle('muted', !sfxEnabled);
-
   document.getElementById('dictClose').addEventListener('click', () => {
     document.getElementById('dictPopup').classList.remove('show');
   });
@@ -1003,5 +999,5 @@ window.onload = () => {
   if (isAndroid) {
     console.log('[SpeakUp] Android detected — interim fallback enabled');
   }
-  
+
 };
