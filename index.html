@@ -4,7 +4,6 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=3.0, user-scalable=yes" />
 <title>SpeakUp — English Speaking Practice</title>
-<link rel="icon" type="image/png" href="img/favicon.png" />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
   :root {
@@ -22,33 +21,7 @@
     --pending:   #1a1714;
     --current:   #a07840;
     --border:    #c8bfad;
-    --shadow:    #00000011;
   }
-
-  /* ─── DARK MODE ──────────────────────────────────────────── */
-  [data-theme="dark"] {
-    --ink:       #ede7d9;
-    --ink-soft:  #b8ae9c;
-    --paper:     #141210;
-    --paper-mid: #1e1b18;
-    --paper-dark:#2a2622;
-    --accent:    #e05545;
-    --accent-dim:#a03828;
-    --gold:      #c9a96e;
-    --gold-pale: #dfc48e;
-    --correct:   #4caf6e;
-    --wrong:     #e05545;
-    --pending:   #ede7d9;
-    --current:   #c9a96e;
-    --border:    #3d3733;
-    --shadow:    #00000044;
-  }
-
-  [data-theme="dark"] .main-logo {
-    filter: invert(1) hue-rotate(180deg) brightness(1.1);
-  }
-
-  [data-theme="dark"] body::before { opacity: 0.02; }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -62,34 +35,6 @@
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
-    transition: background-color 0.5s ease, color 0.4s ease;
-  }
-
-  /* ─── THEME TRANSITION HELPERS ──────────────────────────── */
-  header, footer, .sidebar-card, .text-selector, .text-display-card,
-  .controls-row, .status-bar, .badge, .theme-toggle, .sfx-toggle,
-  .preset-btn, .load-btn, .btn-play, .btn-stop, .btn-reset,
-  .complete-card, .dict-popup, .tip-item, fieldset {
-    transition: background-color 0.5s ease, color 0.4s ease, border-color 0.4s ease;
-  }
-
-  /* ─── THEME TRANSITION OVERLAY ──────────────────────────── */
-  .theme-transition-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-  }
-  .theme-transition-overlay.active {
-    opacity: 1;
-    animation: themeFlash 0.6s ease forwards;
-  }
-  @keyframes themeFlash {
-    0%   { opacity: 0; }
-    30%  { opacity: 0.15; }
-    100% { opacity: 0; }
   }
 
   /* ─── NOISE TEXTURE OVERLAY ─────────────────────────────── */
@@ -138,7 +83,7 @@
   .header-right {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.5rem;
   }
 
   .badge {
@@ -150,46 +95,6 @@
     border: 1.5px solid var(--border);
     color: var(--ink-soft);
   }
-
-  /* ─── DARK MODE TOGGLE ──────────────────────────────────── */
-  .theme-toggle {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    background: none;
-    border: 1.5px solid var(--border);
-    padding: 0.4rem 0.7rem;
-    color: var(--ink-soft);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.6rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    transition: border-color 0.2s, color 0.2s;
-  }
-  .theme-toggle:hover { border-color: var(--gold); color: var(--ink); }
-  .theme-toggle svg { transition: transform 0.35s ease; }
-  [data-theme="dark"] .theme-toggle svg { transform: rotate(180deg); }
-
-
-  /* ─── SFX TOGGLE ────────────────────────────────────────── */
-  .sfx-toggle {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    background: none;
-    border: 1.5px solid var(--border);
-    padding: 0.4rem 0.7rem;
-    color: var(--ink-soft);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.6rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    transition: border-color 0.2s, color 0.2s;
-  }
-  .sfx-toggle:hover { border-color: var(--gold); color: var(--ink); }
-  .sfx-toggle.muted { opacity: 0.5; }
 
   /* ─── MAIN LAYOUT ────────────────────────────────────────── */
   main {
@@ -323,33 +228,30 @@
   .word {
     display: inline-block;
     margin-right: 0.3rem;
-    padding: 0 0.15rem;
-    transition: color 0.3s ease, border-color 0.3s ease, transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease, opacity 0.3s ease;
+    padding: 0 0.1rem;
+    transition: all 0.2s;
     border-bottom: 3px solid transparent;
-    cursor: pointer;
-    border-radius: 2px;
+    cursor: default;
   }
 
   .word.correct {
     color: var(--correct);
     border-bottom-color: var(--correct);
-    animation: correctPop 0.45s cubic-bezier(0.34,1.56,0.64,1);
   }
 
   .word.wrong {
     color: var(--wrong);
     border-bottom-color: var(--wrong);
-    animation: wrongShake 0.5s ease;
+    animation: shake 0.35s ease;
   }
 
   .word.current {
     color: var(--current);
     border-bottom-color: var(--current);
     background: #a0784015;
-    animation: currentPulse 2s ease-in-out infinite;
   }
 
-  .word.pending { color: var(--ink); opacity: 0.35; }
+  .word.pending { color: var(--ink); opacity: 0.4; }
   /* ─── TTS WORD TOOLTIP ───────────────────────────────────── */
   .word-wrap {
     display: inline-block;
@@ -413,26 +315,10 @@
 
 
 
-  @keyframes correctPop {
-    0%   { transform: scale(1); }
-    40%  { transform: scale(1.12); }
-    70%  { transform: scale(0.97); }
-    100% { transform: scale(1); }
-  }
-
-  @keyframes wrongShake {
+  @keyframes shake {
     0%, 100% { transform: translateX(0); }
-    15%  { transform: translateX(-5px); }
-    30%  { transform: translateX(5px); }
-    45%  { transform: translateX(-4px); }
-    60%  { transform: translateX(4px); }
-    75%  { transform: translateX(-2px); }
-    90%  { transform: translateX(2px); }
-  }
-
-  @keyframes currentPulse {
-    0%, 100% { box-shadow: 0 0 0 0 transparent; }
-    50%      { box-shadow: 0 0 8px 2px #a0784025; }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
   }
 
   /* ─── PROGRESS BAR ───────────────────────────────────────── */
@@ -787,206 +673,84 @@
 
   .complete-btn:hover { background: var(--accent); }
 
-  /* ─── WAVEFORM CANVAS ────────────────────────────────────── */
-  .waveform-canvas {
-    height: 24px;
-    width: 80px;
-    flex-shrink: 0;
+  /* ─── WAVEFORM ANIMATION ─────────────────────────────────── */
+  .waveform {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 20px;
   }
 
-  /* ─── DICTIONARY POPUP ──────────────────────────────────── */
-  .dict-popup {
-    display: none;
-    position: fixed;
-    z-index: 600;
-    background: var(--paper);
-    border: 1.5px solid var(--border);
-    padding: 1.2rem 1.5rem;
-    max-width: 360px;
-    width: 90vw;
-    box-shadow: 0 8px 32px var(--shadow);
-    animation: dictFadeIn 0.2s ease;
-  }
-  .dict-popup.show { display: block; }
-
-  @keyframes dictFadeIn {
-    from { opacity: 0; transform: translateY(-6px); }
-    to   { opacity: 1; transform: translateY(0); }
+  .wave-bar {
+    width: 3px;
+    background: var(--accent);
+    border-radius: 1px;
+    height: 4px;
+    transition: height 0.15s;
   }
 
-  .dict-close {
-    position: absolute;
-    top: 0.6rem;
-    right: 0.75rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--ink-soft);
-    padding: 2px;
-    transition: color 0.15s;
-  }
-  .dict-close:hover { color: var(--accent); }
+  .waveform.active .wave-bar:nth-child(1) { animation: wave 0.8s ease-in-out infinite 0.0s; }
+  .waveform.active .wave-bar:nth-child(2) { animation: wave 0.8s ease-in-out infinite 0.1s; }
+  .waveform.active .wave-bar:nth-child(3) { animation: wave 0.8s ease-in-out infinite 0.2s; }
+  .waveform.active .wave-bar:nth-child(4) { animation: wave 0.8s ease-in-out infinite 0.15s; }
+  .waveform.active .wave-bar:nth-child(5) { animation: wave 0.8s ease-in-out infinite 0.05s; }
 
-  .dict-word {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: var(--ink);
-    margin-bottom: 0.15rem;
-  }
-
-  .dict-phonetic {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.78rem;
-    color: var(--gold);
-    margin-bottom: 0.6rem;
-  }
-
-  .dict-pos {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.6rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 0.35rem;
-    padding-top: 0.5rem;
-    border-top: 1px solid var(--border);
-  }
-
-  .dict-def {
-    font-size: 0.82rem;
-    color: var(--ink-soft);
-    line-height: 1.6;
-    margin-bottom: 0.3rem;
-  }
-
-  .dict-example {
-    font-size: 0.75rem;
-    color: var(--gold);
-    font-style: italic;
-    line-height: 1.5;
-    padding-left: 0.75rem;
-    border-left: 2px solid var(--border);
-    margin-bottom: 0.4rem;
-  }
-
-  .dict-loading {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.72rem;
-    color: var(--ink-soft);
-    text-align: center;
-    padding: 1rem 0;
-  }
-
-  .dict-error {
-    font-size: 0.8rem;
-    color: var(--wrong);
-    text-align: center;
-    padding: 0.5rem 0;
+  @keyframes wave {
+    0%, 100% { height: 4px; }
+    50% { height: 16px; }
   }
 
   /* ─── FOOTER ─────────────────────────────────────────────── */
   footer {
     position: relative;
     z-index: 10;
-    background-color: var(--paper-mid);
+    padding: 0;
     border-top: 1px solid var(--border);
-    padding: 3rem;
+  }
+
+  .footer-top {
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
     align-items: center;
-    gap: 2rem;
-  }
-
-  .footer-content {
-    width: 100%;
-    max-width: 1300px;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    align-items: center;
-    gap: 2rem;
-  }
-
-  .footer-brand {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  .footer-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.5rem;
-    font-weight: 900;
-    color: var(--ink);
-  }
-
-  .footer-title span { color: var(--accent); }
-
-  .footer-subtitle {
+    padding: 1rem 3rem;
+    border-bottom: 1px solid var(--border);
     font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--ink-soft);
-    text-transform: uppercase;
+    font-size: 0.62rem;
     letter-spacing: 0.1em;
+    color: var(--ink-soft);
   }
 
   .footer-dev {
     display: flex;
-    justify-content: center;
     align-items: center;
-    gap: 0.4rem;
-    font-family: 'Instrument Sans', sans-serif;
-    font-size: 0.85rem;
-    color: var(--ink-soft);
+    justify-content: center;
+    gap: 1.25rem;
+    padding: 0.85rem 3rem;
+    background: var(--ink);
+    color: #c8bfad99;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
   }
 
   .footer-dev-name {
     font-family: 'Playfair Display', serif;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     font-weight: 700;
     font-style: italic;
-    color: var(--gold);
-    padding-left: 0.2rem;
+    color: var(--gold-pale);
+    letter-spacing: 0.02em;
+    text-transform: none;
   }
 
-  .footer-tech {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 0.6rem;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    color: var(--ink-soft);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+  .footer-dev-sep {
+    width: 1px;
+    height: 14px;
+    background: #ffffff22;
   }
 
-  .footer-bottom {
-    width: 100%;
-    max-width: 1300px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 1.5rem;
-    border-top: 1px solid rgba(200, 191, 173, 0.4);
-    font-family: 'Instrument Sans', sans-serif;
-    font-size: 0.8rem;
-    color: var(--ink-soft);
-  }
-
-  @media (max-width: 900px) {
-    .footer-content {
-      grid-template-columns: 1fr;
-      text-align: center;
-      gap: 1.5rem;
-    }
-    .footer-brand { align-items: center; }
-    .footer-tech { justify-content: center; }
-    .footer-bottom {
-      flex-direction: column;
-      gap: 1rem;
-    }
-  }
+  .footer-dev-heart { color: var(--accent); }
 
   /* ─── RESPONSIVE ─────────────────────────────────────────── */
   @media (max-width: 900px) {
@@ -1043,19 +807,6 @@
 <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
-<div class="theme-transition-overlay" id="themeOverlay"></div>
-
-<!-- ─── DICTIONARY POPUP ────────────────────────────────────── -->
-<div class="dict-popup" id="dictPopup">
-  <button class="dict-close" id="dictClose" aria-label="Close dictionary">
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-      <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    </svg>
-  </button>
-  <div id="dictContent">
-    <div class="dict-loading">Click a word to look up its definition.</div>
-  </div>
-</div>
 
 <!-- ─── FEEDBACK TOAST ──────────────────────────────────────── -->
 <div class="feedback-toast" id="toast"></div>
@@ -1086,35 +837,17 @@
 
 <!-- ─── HEADER ──────────────────────────────────────────────── -->
 <header>
-  <div style="display: flex; align-items: center; gap: 1rem;">
-    <img src="img/headrlogo.png" alt="SpeakUp Logo" class="main-logo" style="height: 3.5rem; width: auto; object-fit: contain;" />
-    <div class="logo-block">
-      <p class="logo-eyebrow">English Speaking Practice</p>
-      <h1 class="logo-title">Speak<span>Up</span></h1>
-    </div>
+  <div class="logo-block">
+    <p class="logo-eyebrow">English Speaking Practice</p>
+    <h1 class="logo-title">Speak<span>Up</span></h1>
   </div>
   <div class="header-right">
     <div class="badge">Speech Recognition</div>
-    <button class="sfx-toggle" id="sfxToggle" onclick="toggleSFX()" title="Toggle sound effects">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" id="sfxIcon">
-        <path d="M1 5.5h2.5L7 2v12L3.5 10.5H1v-5z" fill="currentColor"/>
-        <path d="M10 4.5a4.5 4.5 0 0 1 0 7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-        <path d="M12 3a7 7 0 0 1 0 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" opacity="0.5"/>
-      </svg>
-      SFX
-    </button>
-    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle dark mode">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" id="themeIcon">
-        <circle cx="8" cy="8" r="3.5" stroke="currentColor" stroke-width="1.3"/>
-        <path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-      </svg>
-      Light
-    </button>
     <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="14" cy="14" r="13" stroke="var(--ink)" stroke-width="1.5"/>
-      <rect x="10" y="7" width="8" height="11" rx="4" stroke="var(--ink)" stroke-width="1.5"/>
-      <path d="M7 17c0 3.866 3.134 7 7 7s7-3.134 7-7" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round"/>
-      <line x1="14" y1="24" x2="14" y2="27" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="14" cy="14" r="13" stroke="#1a1714" stroke-width="1.5"/>
+      <rect x="10" y="7" width="8" height="11" rx="4" stroke="#1a1714" stroke-width="1.5"/>
+      <path d="M7 17c0 3.866 3.134 7 7 7s7-3.134 7-7" stroke="#c0392b" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="14" y1="24" x2="14" y2="27" stroke="#c0392b" stroke-width="1.5" stroke-linecap="round"/>
     </svg>
   </div>
 </header>
@@ -1179,7 +912,13 @@
     <div class="status-bar">
       <div class="status-dot" id="statusDot"></div>
       <span class="status-text" id="statusText">Ready to start. Press Play to begin.</span>
-      <canvas class="waveform-canvas" id="waveformCanvas" width="160" height="48"></canvas>
+      <div class="waveform" id="waveform">
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+      </div>
       <span class="status-heard" id="heardText"></span>
     </div>
 
@@ -1291,16 +1030,6 @@
           Make sure your microphone is working and the room is quiet.
         </div>
       </div>
-      <div class="tip-item" style="margin-top: 0.5rem; border-left: 2px solid var(--gold); padding-left: 0.6rem; opacity: 0.85;">
-          <svg class="tip-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M7 1C4.24 1 2 3.24 2 6v2.5L1 10v1h12v-1l-1-1.5V6c0-2.76-2.24-5-5-5z" stroke="var(--gold)" stroke-width="1.3" fill="none"/>
-            <path d="M5 12c0 1.1.9 2 2 2s2-.9 2-2" stroke="var(--gold)" stroke-width="1.3" fill="none"/>
-            <circle cx="4" cy="6" r="1.5" stroke="var(--gold)" stroke-width="1" fill="none"/>
-            <circle cx="10" cy="6" r="1.5" stroke="var(--gold)" stroke-width="1" fill="none"/>
-            <path d="M4 4.5C4 3 5 1.5 7 1.5S10 3 10 4.5" stroke="var(--gold)" stroke-width="1" fill="none"/>
-          </svg>
-          For better experience, use headphones.
-        </div>
     </div>
 
   </div>
@@ -1308,259 +1037,34 @@
 
 <!-- ─── FOOTER ───────────────────────────────────────────────── -->
 <footer>
-  <div class="footer-content">
-    <div class="footer-brand">
-      <div class="footer-title">Speak<span>Up</span></div>
-      <div class="footer-subtitle">English Speaking Practice</div>
-    </div>
-    
-    <div class="footer-dev">
-      <span>Crafted with</span>
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--accent)" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-      </svg>
-      <span>by</span>
-      <span class="footer-dev-name">Marr</span>
-    </div>
-
-    <div class="footer-tech">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2z"></path>
-        <path d="M12 6v6l4 2"></path>
-      </svg>
-      Powered by Web Speech API
-    </div>
+  <div class="footer-top">
+    <span>SpeakUp &mdash; English Speaking Practice</span>
+    <span>Powered by Web Speech API &nbsp;&middot;&nbsp; Best on Chrome &amp; Edge</span>
   </div>
-
-  <div class="footer-bottom">
-    <span>&copy; 2026 SpeakUp. All rights reserved.</span>
-    <span>Best on Chrome &amp; Edge</span>
+  <div class="footer-dev">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <rect x="1" y="3" width="12" height="9" rx="1.5" stroke="#c9a96e" stroke-width="1.2"/>
+      <path d="M4 3V2.5a3 3 0 0 1 6 0V3" stroke="#c9a96e" stroke-width="1.2"/>
+      <circle cx="7" cy="7.5" r="1.2" fill="#c9a96e"/>
+    </svg>
+    <span>Crafted with</span>
+    <svg class="footer-dev-heart" width="13" height="13" viewBox="0 0 13 13" fill="none">
+      <path d="M6.5 11S1 7.5 1 4a2.5 2.5 0 0 1 5.5-.5A2.5 2.5 0 0 1 12 4c0 3.5-5.5 7-5.5 7z" fill="#c0392b"/>
+    </svg>
+    <span>by</span>
+    <span class="footer-dev-name">Marr</span>
+    <div class="footer-dev-sep"></div>
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+      <circle cx="6.5" cy="6.5" r="5.5" stroke="#c8bfad" stroke-width="1.1" opacity="0.5"/>
+      <path d="M4 5.5c0-1.38 1.12-2.5 2.5-2.5S9 4.12 9 5.5c0 2.5-2.5 4-2.5 4S4 8 4 5.5z" stroke="#c8bfad" stroke-width="1.1" opacity="0.5"/>
+      <line x1="2" y1="6.5" x2="11" y2="6.5" stroke="#c8bfad" stroke-width="1.1" opacity="0.5"/>
+    </svg>
+    <span>speakup &copy; 2025</span>
   </div>
 </footer>
 
 <!-- ─── SCRIPT ───────────────────────────────────────────────── -->
 <script>
-  // ══════════════════════════════════════════════════════════════
-  // ── DARK MODE ────────────────────────────────────────────────
-  // ══════════════════════════════════════════════════════════════
-  const MOON_SVG = `<path d="M13 1.5a7 7 0 1 0 0 13A7.5 7.5 0 0 1 13 1.5z" stroke="currentColor" stroke-width="1.3" fill="none"/>`;
-  const SUN_SVG = `<circle cx="8" cy="8" r="3.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>`;
-
-  function applyTheme(theme) {
-    document.documentElement.setAttribute('data-theme', theme);
-    const btn = document.getElementById('themeToggle');
-    const icon = document.getElementById('themeIcon');
-    if (theme === 'dark') {
-      icon.innerHTML = MOON_SVG;
-      btn.lastChild.textContent = ' Dark';
-    } else {
-      icon.innerHTML = SUN_SVG;
-      btn.lastChild.textContent = ' Light';
-    }
-    localStorage.setItem('speakup-theme', theme);
-  }
-
-  function toggleTheme() {
-    const current = document.documentElement.getAttribute('data-theme') || 'light';
-    const next = current === 'dark' ? 'light' : 'dark';
-
-    // Flash overlay animation
-    const overlay = document.getElementById('themeOverlay');
-    if (overlay) {
-      overlay.style.backgroundColor = next === 'dark' ? '#141210' : '#f5f0e8';
-      overlay.classList.remove('active');
-      void overlay.offsetWidth;
-      overlay.classList.add('active');
-      setTimeout(() => overlay.classList.remove('active'), 650);
-    }
-
-    applyTheme(next);
-    playSFX('click');
-  }
-
-  // Init theme from storage
-  (function() {
-    const saved = localStorage.getItem('speakup-theme') || 'light';
-    document.documentElement.setAttribute('data-theme', saved);
-  })();
-
-  // ══════════════════════════════════════════════════════════════
-  // ── SFX ENGINE (Web Audio API) ──────────────────────────────
-  // ══════════════════════════════════════════════════════════════
-  let sfxEnabled = localStorage.getItem('speakup-sfx') !== 'off';
-  let sfxCtx = null;
-
-  function getSFXCtx() {
-    if (!sfxCtx) { try { sfxCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {} }
-    return sfxCtx;
-  }
-
-  function playSFX(type) {
-    if (!sfxEnabled) return;
-    const ctx = getSFXCtx();
-    if (!ctx) return;
-    const now = ctx.currentTime;
-    const gain = ctx.createGain();
-    gain.connect(ctx.destination);
-
-    if (type === 'correct') {
-      gain.gain.setValueAtTime(0.12, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-      const o1 = ctx.createOscillator(); o1.type = 'sine'; o1.frequency.value = 880;
-      o1.connect(gain); o1.start(now); o1.stop(now + 0.15);
-      const o2 = ctx.createOscillator(); o2.type = 'sine'; o2.frequency.value = 1174;
-      const g2 = ctx.createGain(); g2.gain.setValueAtTime(0.1, now + 0.1); g2.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-      o2.connect(g2); g2.connect(ctx.destination); o2.start(now + 0.1); o2.stop(now + 0.4);
-    } else if (type === 'wrong') {
-      gain.gain.setValueAtTime(0.08, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-      const o = ctx.createOscillator(); o.type = 'square'; o.frequency.value = 220;
-      o.frequency.exponentialRampToValueAtTime(160, now + 0.25);
-      o.connect(gain); o.start(now); o.stop(now + 0.3);
-    } else if (type === 'complete') {
-      [523, 659, 784, 1047].forEach((freq, i) => {
-        const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = freq;
-        const g = ctx.createGain(); g.gain.setValueAtTime(0.1, now + i*0.15);
-        g.gain.exponentialRampToValueAtTime(0.001, now + i*0.15 + 0.4);
-        o.connect(g); g.connect(ctx.destination); o.start(now + i*0.15); o.stop(now + i*0.15 + 0.4);
-      });
-    } else if (type === 'click') {
-      gain.gain.setValueAtTime(0.06, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-      const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = 600;
-      o.connect(gain); o.start(now); o.stop(now + 0.08);
-    }
-  }
-
-  function toggleSFX() {
-    sfxEnabled = !sfxEnabled;
-    localStorage.setItem('speakup-sfx', sfxEnabled ? 'on' : 'off');
-    const btn = document.getElementById('sfxToggle');
-    btn.classList.toggle('muted', !sfxEnabled);
-    if (sfxEnabled) playSFX('click');
-  }
-
-  // ══════════════════════════════════════════════════════════════
-  // ── CANVAS WAVEFORM ─────────────────────────────────────────
-  // ══════════════════════════════════════════════════════════════
-  let audioCtx = null, analyser = null, micStream = null, waveAnimId = null;
-  const waveCanvas = document.getElementById('waveformCanvas');
-  const waveCtx2d = waveCanvas ? waveCanvas.getContext('2d') : null;
-
-  async function startWaveform() {
-    try {
-      micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 64;
-      const source = audioCtx.createMediaStreamSource(micStream);
-      source.connect(analyser);
-      drawWaveform();
-    } catch(e) { /* mic denied or unavailable, canvas stays blank */ }
-  }
-
-  function drawWaveform() {
-    if (!analyser || !waveCtx2d) return;
-    const bufLen = analyser.frequencyBinCount;
-    const data = new Uint8Array(bufLen);
-
-    function draw() {
-      waveAnimId = requestAnimationFrame(draw);
-      analyser.getByteFrequencyData(data);
-      const w = waveCanvas.width, h = waveCanvas.height;
-      waveCtx2d.clearRect(0, 0, w, h);
-
-      const barCount = 12;
-      const barW = Math.floor(w / barCount) - 2;
-      const step = Math.floor(bufLen / barCount);
-      const style = getComputedStyle(document.documentElement);
-      const color = style.getPropertyValue('--accent').trim() || '#c0392b';
-
-      for (let i = 0; i < barCount; i++) {
-        const val = data[i * step] / 255;
-        const barH = Math.max(2, val * h * 0.9);
-        const x = i * (barW + 2) + 1;
-        const y = (h - barH) / 2;
-        waveCtx2d.fillStyle = color;
-        waveCtx2d.fillRect(x, y, barW, barH);
-      }
-    }
-    draw();
-  }
-
-  function stopWaveform() {
-    if (waveAnimId) { cancelAnimationFrame(waveAnimId); waveAnimId = null; }
-    if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
-    if (audioCtx) { audioCtx.close().catch(()=>{}); audioCtx = null; analyser = null; }
-    if (waveCtx2d && waveCanvas) { waveCtx2d.clearRect(0, 0, waveCanvas.width, waveCanvas.height); }
-  }
-
-  // ══════════════════════════════════════════════════════════════
-  // ── DICTIONARY POPUP ────────────────────────────────────────
-  // ══════════════════════════════════════════════════════════════
-  const dictCache = {};
-
-  async function lookupWord(word) {
-    const popup = document.getElementById('dictPopup');
-    const content = document.getElementById('dictContent');
-    const clean = word.replace(/[.,!?;:'"()\[\]{}\-–—]/g, '').toLowerCase();
-    if (!clean) return;
-
-    content.innerHTML = '<div class="dict-loading">Looking up...</div>';
-    popup.classList.add('show');
-
-    // Position near mouse or center
-    popup.style.left = Math.min(window.innerWidth - 380, Math.max(10, window._dictX || 100)) + 'px';
-    popup.style.top = Math.min(window.innerHeight - 300, (window._dictY || 200) + 20) + 'px';
-
-    if (dictCache[clean]) { renderDict(dictCache[clean], clean); return; }
-
-    try {
-      const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${clean}`);
-      if (!res.ok) throw new Error('Not found');
-      const data = await res.json();
-      dictCache[clean] = data;
-      renderDict(data, clean);
-    } catch(e) {
-      content.innerHTML = `<div class="dict-error">No definition found for "${clean}".</div>`;
-    }
-  }
-
-  function renderDict(data, word) {
-    const content = document.getElementById('dictContent');
-    const entry = data[0];
-    let html = `<div class="dict-word">${entry.word || word}</div>`;
-    if (entry.phonetic) html += `<div class="dict-phonetic">${entry.phonetic}</div>`;
-    else if (entry.phonetics && entry.phonetics.length) {
-      const ph = entry.phonetics.find(p => p.text) || {};
-      if (ph.text) html += `<div class="dict-phonetic">${ph.text}</div>`;
-    }
-
-    const meanings = (entry.meanings || []).slice(0, 2);
-    meanings.forEach(m => {
-      html += `<div class="dict-pos">${m.partOfSpeech || ''}</div>`;
-      const defs = (m.definitions || []).slice(0, 2);
-      defs.forEach(d => {
-        html += `<div class="dict-def">${d.definition}</div>`;
-        if (d.example) html += `<div class="dict-example">"${d.example}"</div>`;
-      });
-    });
-    content.innerHTML = html;
-  }
-
-  // Close dict popup
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('dictClose').addEventListener('click', () => {
-      document.getElementById('dictPopup').classList.remove('show');
-    });
-    document.addEventListener('click', (e) => {
-      const popup = document.getElementById('dictPopup');
-      if (popup.classList.contains('show') && !popup.contains(e.target) && !e.target.closest('.word')) {
-        popup.classList.remove('show');
-      }
-    });
-  });
-
   // ── PRESETS ─────────────────────────────────────────────────
   const PRESETS = [
     {
@@ -1620,12 +1124,6 @@
   window.onload = () => {
     updatePresetPreview(0);
     setupSpeechRecognition();
-    // Apply saved theme
-    const savedTheme = localStorage.getItem('speakup-theme') || 'light';
-    applyTheme(savedTheme);
-    // Apply saved SFX state
-    const sfxBtn = document.getElementById('sfxToggle');
-    if (sfxBtn) sfxBtn.classList.toggle('muted', !sfxEnabled);
   };
 
   function updatePresetPreview(idx) {
@@ -1697,7 +1195,7 @@
         SPEAKER_SVG +
         `<span class="tts-label">Hear</span>` +
         `</button>` +
-        `<span class="word ${cls}" id="word-${i}" data-dict="${w}" onclick="window._dictX=event.clientX; window._dictY=event.clientY; lookupWord(this.dataset.dict)">${w}</span>` +
+        `<span class="word ${cls}" id="word-${i}">${w}</span>` +
         `</span>`;
     }).join('');
     updateProgress();
@@ -1748,10 +1246,11 @@
   function markWord(idx, status) {
     const el = document.getElementById('word-' + idx);
     if (!el) return;
-    el.style.animation = 'none';
-    void el.offsetWidth; // force reflow to restart animation
-    el.style.animation = '';
     el.className = 'word ' + status;
+    if (status === 'wrong') {
+      void el.offsetWidth; // restart animation
+      el.className = 'word wrong';
+    }
   }
 
   function updateProgress() {
@@ -1772,17 +1271,18 @@
 
     r.onstart = () => {
       isRestarting = false;
-      setStatus('active', 'Listening... Speak naturally, you can say full phrases.');
+      setStatus('active', 'Listening... Speak the highlighted word.');
       document.getElementById('playBtn').classList.add('recording');
-      startWaveform();
+      document.getElementById('waveform').classList.add('active');
     };
 
     r.onend = () => {
       if (isRecording && !isRestarting) {
+        // Normal auto-restart to keep listening
         try { r.start(); } catch(e) {}
       } else if (!isRecording) {
         document.getElementById('playBtn').classList.remove('recording');
-        stopWaveform();
+        document.getElementById('waveform').classList.remove('active');
       }
     };
 
@@ -1848,7 +1348,7 @@
 
         isRestarting = true;
         setStatus('active', 'Microphone changed — reconnecting...');
-        showToast('New mic detected, reconnecting...', 'warning');
+        showToast('🎧 New mic detected, reconnecting...', 'warning');
 
         // Stop old instance cleanly
         try { recognition.abort(); } catch(e) {}
@@ -1862,7 +1362,7 @@
 
         try {
           recognition.start();
-          showToast('Microphone reconnected!', 'success');
+          showToast('✓ Microphone reconnected!', 'success');
         } catch(e) {
           setStatus('error', 'Failed to reconnect mic. Press Stop then Start again.');
           isRecording = false;
@@ -1960,77 +1460,59 @@
   function processSpokenText(transcript, alternatives = []) {
     if (currentWordIdx >= words.length) return;
 
-    // Collect all spoken phrases: transcript + alternatives
-    const allPhrases = [transcript.trim()];
-    for (const alt of alternatives) {
-      const a = alt.trim();
-      if (a && !allPhrases.includes(a)) allPhrases.push(a);
+    const target = words[currentWordIdx];
+    const spokenWords = transcript.trim().split(/\s+/);
+
+    // Try all spoken words and all alternatives
+    let matched = false;
+
+    // Check each spoken word against target
+    for (const sw of spokenWords) {
+      if (wordMatch(sw, target)) { matched = true; break; }
     }
 
-    // Try to match multiple consecutive words from the spoken phrase
-    let bestMatchCount = 0;
-
-    for (const phrase of allPhrases) {
-      const spokenWords = phrase.split(/\s+/);
-      let matchCount = 0;
-      let wordPtr = currentWordIdx;
-
-      // Walk through spoken words and try to match sequentially
-      for (let si = 0; si < spokenWords.length && wordPtr < words.length; si++) {
-        if (wordMatch(spokenWords[si], words[wordPtr])) {
-          matchCount++;
-          wordPtr++;
+    // Check alternatives
+    if (!matched) {
+      for (const alt of alternatives) {
+        const altWords = alt.split(/\s+/);
+        for (const aw of altWords) {
+          if (wordMatch(aw, target)) { matched = true; break; }
         }
-      }
-
-      if (matchCount > bestMatchCount) {
-        bestMatchCount = matchCount;
+        if (matched) break;
       }
     }
 
-    if (bestMatchCount > 0) {
-      // Mark all matched words as correct
-      for (let m = 0; m < bestMatchCount; m++) {
-        markWord(currentWordIdx, 'correct');
-        correctCount++;
-        currentWordIdx++;
-      }
+    if (matched) {
+      // CORRECT
+      markWord(currentWordIdx, 'correct');
+      correctCount++;
+      currentWordIdx++;
       currentWordAttempts = 0;
       document.getElementById('heardText').textContent = '';
       updateStats();
       updatePhonetic();
-      playSFX('correct');
-
-      if (bestMatchCount > 1) {
-        showToast(`${bestMatchCount} words correct!`, 'success');
-      }
 
       if (currentWordIdx >= words.length) {
         // All done!
-        playSFX('complete');
         setTimeout(showComplete, 400);
         stopPractice();
       } else {
         markWord(currentWordIdx, 'current');
         updateProgress();
-        setStatus('active', `Correct! Now say: "${words[currentWordIdx]}"`);
-        if (bestMatchCount <= 1) {
-          showToast(`"${words[currentWordIdx - 1]}" — Correct!`, 'success');
-        }
+        setStatus('active', `✓ Correct! Now say: "${words[currentWordIdx]}"`);
+        showToast(`✓ "${target}" — Correct!`, 'success');
       }
     } else {
       // WRONG
-      const target = words[currentWordIdx];
       retryCount++;
       updateStats();
       markWord(currentWordIdx, 'wrong');
-      playSFX('wrong');
 
       const hint = currentWordAttempts >= 2
         ? ` (Tip: try saying "${target}" more slowly)`
         : '';
-      setStatus('error', `Not quite. Please say: "${target}"${hint}`);
-      showToast(`Say "${target}" again`, 'error');
+      setStatus('error', `✗ Not quite. Please say: "${target}"${hint}`);
+      showToast(`✗ Say "${target}" again`, 'error');
 
       // Flash back to current after shake
       setTimeout(() => {
@@ -2078,7 +1560,6 @@
     markWord(currentWordIdx, 'current');
     updatePhonetic();
     setStatus('active', `Listening... Say: "${words[currentWordIdx]}"`);
-    playSFX('click');
 
     try { recognition.start(); } catch(e) {
       console.error('Recognition start error:', e);
@@ -2096,7 +1577,7 @@
     document.getElementById('playBtn').disabled = false;
     document.getElementById('playBtn').classList.remove('recording');
     document.getElementById('stopBtn').disabled = true;
-    stopWaveform();
+    document.getElementById('waveform').classList.remove('active');
     document.getElementById('heardText').textContent = '';
     if (words.length > 0 && currentWordIdx < words.length) {
       setStatus('idle', `Paused. Say "${words[currentWordIdx]}" when ready.`);
